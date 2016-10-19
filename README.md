@@ -1,3 +1,2 @@
-# vsc-bsl-specflow
+# Gherkin files auto complete Visual Studio Code extension
 
-Тестовый репозитария для автодополнения feature файлов.
