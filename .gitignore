@@ -1,2 +1,4 @@
+.sonar/
+.sonarlint/
 out
 node_modules
