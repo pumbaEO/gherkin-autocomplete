@@ -11,9 +11,12 @@ export default class AbstractProvider {
         this._disposables = [];
     }
 
-    dispose() {
+    public dispose() {
         while (this._disposables.length) {
-            this._disposables.pop().dispose();
+            let disposable = this._disposables.pop();
+            if (disposable) {
+                disposable.dispose();
+            }
         }
     }
 }
