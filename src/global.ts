@@ -8,74 +8,33 @@ let loki = require("lokijs");
 import * as vscode from "vscode";
 
 export class Global {
-    exec: string;
-    cache: any;
-    db: any;
-    dblocal: any;
-    dbcalls: any;
-    private toreplaced: any;
+    private cache: any;
+    private db: any;
+    private dbcalls: any;
+
     private cacheUpdates: boolean;
 
-    parse(source: string, filename: string): any {
-        /*try {
-            let gherkinDocument = parser.parse(source);
-            let result = JSON.stringify(gherkinDocument, null, 2);
-            console.log(result);
-        } catch (error) {
-            console.log(error);
-        }*/
-
-        let ending = "\n";
-        if (source.indexOf("\r\n") > 0) {
-            ending = "\r\n";
-        }
-        let name = path.basename(filename, "feature");
-        let lines = source.split(ending); // "/\r?\n/");
-        let arr = [];
-
-        let lockdb = new loki("loki.json");
-        let methods = lockdb.addCollection("ValueTable");
-        let replReg = new RegExp("'[А-яA-z\d]'", "i");
-        for (let index = 0; index < lines.length; index++) {
-            let element: string = lines[index].trim();
-            if (element.startsWith("#") || element.startsWith("@")) {
-                continue;
-            }
-            if (element.trim().length === 0) { continue; }
-            element = element.replace(/'[а-яёa-z\d]+'/i, "");
-            let methRow: MethodValue = {
-                    "name": String(element),
-                    "isproc": Boolean(false),
-                    "line": index,
-                    "endline": index,
-                    "context": "",
-                    "_method": {},
-                    "filename": filename,
-                    "module": element,
-                    "description": name
-                };
-
-            methods.insert(methRow);
-        }
-        return methods;
+    constructor(exec: string) {
+        this.cache = new loki("gtags.json");
+        this.cacheUpdates = false;
     }
 
-    getCacheLocal(filename: string, word: string, source, update: boolean = false, allToEnd: boolean = true, fromFirst: boolean = true) {
-        let suffix = allToEnd  ? "" : "$";
+    public getCacheLocal(
+        filename: string,
+        word: string,
+        source,
+        update: boolean = false,
+        allToEnd: boolean = true,
+        fromFirst: boolean = true) {
+
+        let suffix = allToEnd ? "" : "$";
         let prefix = fromFirst ? "^" : "";
-        let querystring = {"name": {"$regex": new RegExp(prefix + word + suffix, "i")}};
+        let querystring = { name: { $regex: new RegExp(prefix + word + suffix, "i") } };
         let entries = this.parse(source, filename).find(querystring);
         return entries;
     }
 
-    getReplaceMetadata() {
-        return { };
-    }
-
-    getModuleForPath(fullpath: string, rootPath: string): any {
-        if (!this.toreplaced) {
-            this.toreplaced = this.getReplaceMetadata();
-        }
+    public getModuleForPath(fullpath: string, rootPath: string): any {
 
         fullpath = decodeURIComponent(fullpath);
         let splitsymbol = process.platform === "win32" ? "\\" : "/";
@@ -87,51 +46,14 @@ export class Global {
                 fullpath = fullpath.substr(7);
             }
         }
-        let isbsl = false;
-        let moduleArray: Array<string> = fullpath.substr(rootPath.length + 1).split(splitsymbol);
         let module: string = "";
-        return {"fullpath": fullpath,
-                "module": module};
+        return {
+            fullpath,
+            module,
+        };
     }
 
-    private addtocachefiles(files: Array<vscode.Uri>, isbsl: boolean = false): any {
-        let failed = new Array();
-        let rootPath = vscode.workspace.rootPath;
-        let replaced = this.getReplaceMetadata();
-        for (let i = 0; i < files.length; ++i) {
-            if (i > 10){
-                continue;
-            }
-            let fullpath = files[i].toString();
-            let moduleObj = this.getModuleForPath(fullpath, rootPath);
-            let module = moduleObj.module;
-            fullpath = moduleObj.fullpath;
-            let source = fs.readFileSync(fullpath, "utf-8");
-            let entries = this.parse(source, fullpath).find();
-            let count = 0;
-            let added = {};
-            for (let y = 0; y < entries.length; ++y) {
-                let item = entries[y];
-                item["filename"] = fullpath;
-                let newItem: MethodValue = {
-                    "name": String(item.name),
-                    "isproc": Boolean(item.isproc),
-                    "line": item.line,
-                    "endline": item.endline,
-                    "context": item.context,
-                    "_method": item._method,
-                    "filename": fullpath,
-                    "module": module,
-                    "description": item.description
-                };
-                ++count;
-                this.db.insert(newItem);
-            }
-        }
-        vscode.window.setStatusBarMessage("Обновлен список процедур.", 3000);
-    }
-
-    updateCache(filename: string = ""): any {
+    public updateCache(filename: string = ""): any {
         console.log("update cache");
         this.cacheUpdates = true;
         let rootPath = vscode.workspace.rootPath;
@@ -139,80 +61,51 @@ export class Global {
             this.db = this.cache.addCollection("ValueTable");
             this.dbcalls = this.cache.addCollection("Calls");
 
-            let self = this;
             let files = vscode.workspace.findFiles("**/*.feature", "", 1000);
-                files.then((value) => {
-                    this.addtocachefiles(value, false);
-                }, (reason) => {
-                    console.log(reason);
-                });
+            files.then((value) => {
+                this.addtocachefiles(value, false);
+            }, (reason) => {
+                console.log(reason);
+            });
         }
     };
 
-    queryref(word: string, collection: any, local: boolean = false ): any {
+    public queryref(word: string, collection: any, local: boolean = false): any {
         if (!collection) {
             return new Array();
         }
         let prefix = local ? "" : ".";
-        let querystring = {"call": {"$regex": new RegExp(prefix + word + "$", "i")}};
+        let querystring = { call: { $regex: new RegExp(prefix + word + "$", "i") } };
         let search = collection.chain().find(querystring).simplesort("name").data();
         return search;
     }
 
-    private updateReferenceCalls(collection: any, calls: Array<any>, method: any, file: string, added: any): any {
-        if (!collection) {
-            collection = this.cache.addCollection("Calls");
-        }
-        let self = this;
-        for (let index = 0; index < calls.length; index++) {
-            let value = calls[index];
-            if (added[value.call] === true) {
-                continue;
-            };
-            if (value.call.startsWith(".")) {
-                continue;
-            }
-            added[value.call] = true;
-            let newItem: MethodValue = {
-                "name": String(method.name),
-                "filename": file,
-                "isproc": Boolean(method.isproc),
-                "call": value.call,
-                "context": method.context,
-                "line": value.line,
-                "character": value.character,
-                "endline": method.endline
-            };
-            collection.insert(newItem);
-        }
-    }
-
-    querydef(filename: string, module: string, all: boolean = true, lazy: boolean = false): any {
-        // Проверяем локальный кэш. 
-        // Проверяем глобальный кэш на модули. 
+    public querydef(filename: string, module: string, all: boolean = true, lazy: boolean = false): any {
+        // Проверяем локальный кэш.
+        // Проверяем глобальный кэш на модули.
         // console.log(filename);
         if (!this.cacheUpdates) {
             this.updateCache(filename);
             return new Array();
         } else {
             let prefix = lazy ? "" : "^";
-            let suffix = all  ? "" : "$";
-            let querystring = {"module": {"$regex": new RegExp(prefix + module + suffix, "i")}};
+            let suffix = all ? "" : "$";
+            let querystring = { module: { $regex: new RegExp(prefix + module + suffix, "i") } };
             let search = this.db.chain().find(querystring).simplesort("name").data();
             return search;
         }
     }
 
-    query(filename: string, word: string, module: string, all: boolean = true, lazy: boolean = false): any {
+    public query(filename: string, word: string, module: string, all: boolean = true, lazy: boolean = false): any {
         if (!this.cacheUpdates) {
             this.updateCache(filename);
             return new Array();
         } else {
             let prefix = lazy ? "" : "^";
-            let suffix = all  ? "" : "$";
-            let querystring = {"name": {"$regex": new RegExp(prefix + word + suffix, "i")}};
+            let suffix = all ? "" : "$";
+            let querystring = { name: { $regex: new RegExp(prefix + word + suffix, "i") } };
             if (module && module.length > 0) {
-                querystring["module"] = {"$regex": new RegExp("^" + module + "", "i")};
+                querystring["module"] = { $regex: new RegExp("^" + module + "", "i") };
             }
             let moduleRegexp = new RegExp("^" + module + "$", "i");
             function filterByModule(obj) {
@@ -230,7 +123,7 @@ export class Global {
         }
     }
 
-    fullNameRecursor(word: string, document: vscode.TextDocument, range: vscode.Range, left: boolean) {
+    public fullNameRecursor(word: string, document: vscode.TextDocument, range: vscode.Range, left: boolean) {
         let result: string;
         let plus: number = 1;
         let newRange: vscode.Range;
@@ -239,9 +132,15 @@ export class Global {
             if (range.start.character === 0) {
                 return word;
             }
-            newRange = new vscode.Range(new vscode.Position(range.start.line, range.start.character + plus), new vscode.Position(range.start.line, range.start.character));
+            newRange = new vscode.Range(
+                new vscode.Position(range.start.line, range.start.character + plus),
+                new vscode.Position(range.start.line, range.start.character)
+            );
         } else {
-            newRange = new vscode.Range(new vscode.Position(range.end.line, range.end.character), new vscode.Position(range.end.line, range.end.character + plus));
+            newRange = new vscode.Range(
+                new vscode.Position(range.end.line, range.end.character),
+                new vscode.Position(range.end.line, range.end.character + plus)
+            );
         }
         let dot = document.getText(newRange);
         if (dot.endsWith(".")) {
@@ -269,14 +168,83 @@ export class Global {
         }
     }
 
-    constructor(exec: string) {
-        let configuration = vscode.workspace.getConfiguration("specflow-bsl");
-        this.cache = new loki("gtags.json");
-        this.cacheUpdates = false;
+    private addtocachefiles(files: Array<vscode.Uri>, isbsl: boolean = false): any {
+        let rootPath = vscode.workspace.rootPath;
+        for (let i = 0; i < files.length; ++i) {
+            if (i > 10) {
+                continue;
+            }
+            let fullpath = files[i].toString();
+            let moduleObj = this.getModuleForPath(fullpath, rootPath);
+            let module = moduleObj.module;
+            fullpath = moduleObj.fullpath;
+            let source = fs.readFileSync(fullpath, "utf-8");
+            let entries = this.parse(source, fullpath).find();
+            let count = 0;
+            for (let y = 0; y < entries.length; ++y) {
+                let item = entries[y];
+                item["filename"] = fullpath;
+                let newItem: IMethodValue = {
+                    _method: item._method,
+                    context: item.context,
+                    description: item.description,
+                    endline: item.endline,
+                    filename: fullpath,
+                    isproc: Boolean(item.isproc),
+                    line: item.line,
+                    name: String(item.name),
+                    module,
+                };
+                ++count;
+                this.db.insert(newItem);
+            }
+        }
+        vscode.window.setStatusBarMessage("Обновлен список процедур.", 3000);
+    }
+
+    private parse(source: string, filename: string): any {
+        /*try {
+            let gherkinDocument = parser.parse(source);
+            let result = JSON.stringify(gherkinDocument, null, 2);
+            console.log(result);
+        } catch (error) {
+            console.log(error);
+        }*/
+
+        let ending = "\n";
+        if (source.indexOf("\r\n") > 0) {
+            ending = "\r\n";
+        }
+        let name = path.basename(filename, "feature");
+        let lines = source.split(ending); // "/\r?\n/");
+
+        let lockdb = new loki("loki.json");
+        let methods = lockdb.addCollection("ValueTable");
+        for (let index = 0; index < lines.length; index++) {
+            let element: string = lines[index].trim();
+            if (element.startsWith("#") || element.startsWith("@")) {
+                continue;
+            }
+            if (element.trim().length === 0) { continue; }
+            element = element.replace(/'[а-яёa-z\d]+'/i, "");
+            let methRow: IMethodValue = {
+                _method: {},
+                context: "",
+                description: name,
+                endline: index,
+                filename,
+                isproc: Boolean(false),
+                line: index,
+                module: element,
+                name: String(element),
+            };
+
+            methods.insert(methRow);
+        }
+        return methods;
     }
 }
-
-interface MethodValue {
+interface IMethodValue {
     // Имя процедуры/функции'
     name: string;
     // Процедура = true, Функция = false

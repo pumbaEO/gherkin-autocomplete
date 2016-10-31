@@ -3,11 +3,13 @@ import AbstractProvider from "./abstractProvider";
 
 
 export default class GlobalCompletionItemProvider extends AbstractProvider implements vscode.CompletionItemProvider {
-    added: Object;
+    private added: Object;
 
-    provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Thenable<vscode.CompletionItem[]> {
+    public provideCompletionItems(
+        document: vscode.TextDocument,
+        position: vscode.Position,
+        token: vscode.CancellationToken): Thenable<vscode.CompletionItem[]> {
 
-        let word = document.lineAt(position.line).text.trim();
         let self = this;
         this.added = {};
 
@@ -17,14 +19,17 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             let word = textLine.text.trim();
             let firstChar = textLine.firstNonWhitespaceCharacterIndex;
 
-            let result: Array<any> = self._global.getCacheLocal(document.fileName, word, document.getText(), false );
-            result.forEach(function (value, index, array) {
+            let result: Array<any> = self._global.getCacheLocal(document.fileName, word, document.getText(), false);
+            result.forEach( (value, index, array) => {
                 if (!self.added[value.name.toLowerCase()] === true) {
                     if (value.name === word) { return; }
                     let item = new vscode.CompletionItem(value.name);
                     item.sortText = "0";
                     item.insertText = value.name;
-                    item.textEdit = new vscode.TextEdit(new vscode.Range(position.line, firstChar, position.line, position.character), value.name);
+                    item.textEdit = new vscode.TextEdit(
+                        new vscode.Range(position.line, firstChar, position.line, position.character),
+                        value.name
+                    );
                     item.filterText = value.name;
                     item.documentation = value.description;
                     item.kind = vscode.CompletionItemKind.Keyword;
@@ -33,14 +38,17 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 }
             });
             result = self._global.query(document.fileName, word, "", true, false);
-            result.forEach(function (value, index, array) {
+            result.forEach( (value, index, array) => {
                 let moduleDescription = (value.module && value.module.length > 0) ? module + "." : "";
                 if (self.added[(moduleDescription + value.name).toLowerCase()] !== true) {
                     let item = new vscode.CompletionItem(value.name);
                     item.insertText = value.name.substr(word.length);
                     item.sortText = "1";
                     item.insertText = value.name;
-                    item.textEdit = new vscode.TextEdit(new vscode.Range(position.line, firstChar, position.line, position.character), value.name);
+                    item.textEdit = new vscode.TextEdit(
+                        new vscode.Range(position.line, firstChar, position.line, position.character),
+                        value.name
+                    );
                     item.documentation = value.description;
                     item.kind = vscode.CompletionItemKind.File;
                     bucket.push(item);
