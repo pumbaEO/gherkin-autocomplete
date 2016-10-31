@@ -3,12 +3,6 @@ import * as path from "path";
 let Gherkin = require("gherkin");
 let parser = new Gherkin.Parser();
 
-
-// import * as bslglobals from "./features/bslGlobals";
-// import keyword from "./features/bslGlobals";
-
-let exec = require("child-process-promise").exec;
-let iconv = require("iconv-lite");
 let loki = require("lokijs");
 
 import * as vscode from "vscode";
@@ -48,7 +42,7 @@ export class Global {
                 continue;
             }
             if (element.trim().length === 0) { continue; }
-            element = element.replace(/'[А-яA-z\d]+'/i, "");
+            element = element.replace(/'[а-яёa-z\d]+'/i, "");
             let methRow: MethodValue = {
                     "name": String(element),
                     "isproc": Boolean(false),
