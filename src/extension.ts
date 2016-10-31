@@ -14,8 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(vscode.commands.registerCommand("specflow-bsl.update", () => {
-        let filename = vscode.window.activeTextEditor.document.fileName;
-        global.updateCache(filename);
+        global.updateCache();
     }));
     console.log("feature bsl loaded");
 

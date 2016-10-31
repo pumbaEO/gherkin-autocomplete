@@ -53,7 +53,7 @@ export class Global {
         };
     }
 
-    public updateCache(filename: string = ""): any {
+    public updateCache(): any {
         console.log("update cache");
         this.cacheUpdates = true;
         let rootPath = vscode.workspace.rootPath;
@@ -85,7 +85,7 @@ export class Global {
         // Проверяем глобальный кэш на модули.
         // console.log(filename);
         if (!this.cacheUpdates) {
-            this.updateCache(filename);
+            this.updateCache();
             return new Array();
         } else {
             let prefix = lazy ? "" : "^";
@@ -98,7 +98,7 @@ export class Global {
 
     public query(filename: string, word: string, module: string, all: boolean = true, lazy: boolean = false): any {
         if (!this.cacheUpdates) {
-            this.updateCache(filename);
+            this.updateCache();
             return new Array();
         } else {
             let prefix = lazy ? "" : "^";

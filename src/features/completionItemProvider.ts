@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
 
-
 export default class GlobalCompletionItemProvider extends AbstractProvider implements vscode.CompletionItemProvider {
     private added: Object;
 
