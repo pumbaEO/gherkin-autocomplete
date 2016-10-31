@@ -9,7 +9,7 @@
     "color": "#0000FF",
     "theme": "dark"
   },
-  "license": "LICENSE.md",
+  "license": "SEE LICENSE IN LICENSE.md",
   "bugs": {
     "url": "https://github.com/silverbulleters/gherkin-autocomplete/issues"
   },
@@ -60,16 +60,15 @@
     }
   },
   "devDependencies": {
-    "typescript": "^2.0.3",
-    "vsce": "^1.3.0",
-    "vscode": "^1.0.0",
-    "@types/node": "^6.0.40"
+    "typescript": "^2.0.6",
+    "vscode": "^1.0.3",
+    "@types/node": "^6.0.46"
   },
   "dependencies": {
-    "child-process-promise": "^1.1.0",
-    "fs-readfile-promise": "^2.0.1",
+    "child-process-promise": "^2.1.3",
+    "fs-readfile-promise": "^3.0.0",
     "gherkin": "^4.0.0",
     "iconv-lite": "^0.4.13",
-    "lokijs": "^1.4.x"
+    "lokijs": "^1.4.1"
   }
 }
