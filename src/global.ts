@@ -295,5 +295,3 @@ interface MethodValue {
     character?: number;
     _method?: {};
 }
-
-/// <reference path="node.d.ts" />
