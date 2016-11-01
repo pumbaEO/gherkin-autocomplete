@@ -176,7 +176,6 @@ export class Global {
             }
             let fullpath = files[i].toString();
             let moduleObj = this.getModuleForPath(fullpath, rootPath);
-            let module = moduleObj.module;
             fullpath = moduleObj.fullpath;
             let source = fs.readFileSync(fullpath, "utf-8");
             let entries = this.parse(source, fullpath).find();
@@ -185,15 +184,11 @@ export class Global {
                 let item = entries[y];
                 item["filename"] = fullpath;
                 let newItem: IMethodValue = {
-                    _method: item._method,
-                    context: item.context,
                     description: item.description,
                     endline: item.endline,
                     filename: fullpath,
-                    isproc: Boolean(item.isproc),
                     line: item.line,
-                    name: String(item.name),
-                    module,
+                    name: item.description,
                 };
                 ++count;
                 this.db.insert(newItem);
@@ -203,63 +198,78 @@ export class Global {
     }
 
     private parse(source: string, filename: string): any {
-        /*try {
-            let gherkinDocument = parser.parse(source);
-            let result = JSON.stringify(gherkinDocument, null, 2);
-            console.log(result);
-        } catch (error) {
-            console.log(error);
-        }*/
-
-        let ending = "\n";
-        if (source.indexOf("\r\n") > 0) {
-            ending = "\r\n";
-        }
-        let name = path.basename(filename, "feature");
-        let lines = source.split(ending); // "/\r?\n/");
 
         let lockdb = new loki("loki.json");
         let methods = lockdb.addCollection("ValueTable");
-        for (let index = 0; index < lines.length; index++) {
-            let element: string = lines[index].trim();
-            if (element.startsWith("#") || element.startsWith("@")) {
-                continue;
-            }
-            if (element.trim().length === 0) { continue; }
-            element = element.replace(/'[а-яёa-z\d]+'/i, "");
-            let methRow: IMethodValue = {
-                _method: {},
-                context: "",
-                description: name,
-                endline: index,
-                filename,
-                isproc: Boolean(false),
-                line: index,
-                module: element,
-                name: String(element),
-            };
 
-            methods.insert(methRow);
+
+        let gherkinDocument;
+        try {
+            gherkinDocument = parser.parse(source);
+        } catch (error) {
+            console.log(error);
+            return methods;
         }
+
+        const children = gherkinDocument.feature.children;
+        for (let index = 0; index < children.length; index++) {
+            const child = children[index];
+            const steps = child.steps;
+
+            for (let indexStep = 0; indexStep < steps.length; indexStep++) {
+                const step = steps[indexStep];
+
+                let methRow: IMethodValue = {
+                    description: step.text,
+                    endline: step.location.line,
+                    filename,
+                    line: step.location.line,
+                    name: step.text,
+                };
+
+                methods.insert(methRow);
+            }
+
+        }
+
         return methods;
+
+        // let ending = "\n";
+        // if (source.indexOf("\r\n") > 0) {
+        //     ending = "\r\n";
+        // }
+        // let name = path.basename(filename, "feature");
+        // let lines = source.split(ending); // "/\r?\n/");
+
+        // for (let index = 0; index < lines.length; index++) {
+        //     let element: string = lines[index].trim();
+        //     if (element.startsWith("#") || element.startsWith("@")) {
+        //         continue;
+        //     }
+        //     if (element.trim().length === 0) { continue; }
+        //     element = element.replace(/'[а-яёa-z\d]+'/i, "");
+        //     let methRow: IMethodValue = {
+        //         description: name,
+        //         endline: index,
+        //         filename,
+        //         line: index,
+        //     };
+
+        //     methods.insert(methRow);
+        // }
+        // return methods;
     }
 }
 interface IMethodValue {
-    // Имя процедуры/функции'
+
     name: string;
-    // Процедура = true, Функция = false
-    isproc: boolean;
+
     // начало
     line: number;
     // конец процедуры
     endline: number;
 
     filename: string;
-    // контекст НаСервере, НаКлиенте, НаСервереБезКонтекста
-    context?: string;
-    module?: string;
+
     description?: string;
-    call?: string;
-    character?: number;
-    _method?: {};
 }
