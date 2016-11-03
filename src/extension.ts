@@ -16,6 +16,6 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand("gherkin-autocomplete.update", () => {
         global.updateCache();
     }));
-    console.log("feature bsl loaded");
 
+    global.updateCache();
 }
