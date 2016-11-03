@@ -13,9 +13,9 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.languages.registerCompletionItemProvider(["feature", "feature"], new CompletionItemProvider(global), ".")
     );
 
-    context.subscriptions.push(vscode.commands.registerCommand("specflow-bsl.update", () => {
+    context.subscriptions.push(vscode.commands.registerCommand("gherkin-autocomplete.update", () => {
         global.updateCache();
     }));
-    console.log("feature bsl loaded");
 
+    global.updateCache();
 }
