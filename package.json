@@ -3,7 +3,7 @@
   "displayName": "Gherkin Editor With AutoComplete",
   "description": "Code extension for automplete Gherkin Steps",
   "icon": "images/SBIcon.png",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "publisher": "silverbulleters",
   "galleryBanner": {
     "color": "#0000FF",
