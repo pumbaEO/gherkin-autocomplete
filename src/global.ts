@@ -201,13 +201,12 @@ export class Global {
 
         let lockdb = new loki("loki.json");
         let methods = lockdb.addCollection("ValueTable");
-
-
+        let TokenMatcher = new Gherkin.TokenMatcher("ru");
         let gherkinDocument;
         try {
-            gherkinDocument = parser.parse(source);
+            gherkinDocument = parser.parse(source, TokenMatcher);
         } catch (error) {
-            console.log(error);
+            console.log("error parse file " + filename + ":" + error);
             return methods;
         }
 
