@@ -1,7 +1,7 @@
 {
   "name": "gherkin-autocomplete",
-  "displayName": "Gherkin Editor With AutoComplete",
-  "description": "Code extension for automplete Gherkin Steps",
+  "displayName": "Gherkin step autocomplete",
+  "description": "Code extension for automplete of Gherkin Steps in *.feature files",
   "icon": "images/SBIcon.png",
   "version": "1.0.0",
   "publisher": "silverbulleters",
@@ -19,11 +19,24 @@
     "url": "https://github.com/silverbulleters/gherkin-autocomplete.git"
   },
   "categories": [
-    "Languages"
+    "Languages",
+    "Other"
+  ],
+  "keywords": [
+    "autocomplete",
+    "gherkin",
+    "feature"
   ],
   "engines": {
     "vscode": "^1.6.0"
   },
+  "badges": [
+    {
+      "url": "https://david-dm.org/silverbulleters/gherkin-autocomplete.svg",
+      "href": "https://david-dm.org/silverbulleters/gherkin-autocomplete",
+      "description": "Dependency Status"
+    }
+  ],
   "main": "./out/src/extension",
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
@@ -39,7 +52,7 @@
       {
         "command": "gherkin-autocomplete.update",
         "title": "Update steps cache",
-        "category": "Update feature"
+        "category": "Gherkin autocomplete"
       }
     ]
   },
