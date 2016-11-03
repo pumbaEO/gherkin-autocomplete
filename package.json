@@ -1,5 +1,5 @@
 {
-  "name": "gherkin-editor",
+  "name": "gherkin-autocomplete",
   "displayName": "Gherkin Editor With AutoComplete",
   "description": "Code extension for automplete Gherkin Steps",
   "icon": "images/SBIcon.png",
@@ -32,30 +32,16 @@
   },
   "activationEvents": [
     "onLanguage:feature",
-    "onCommand:gherkin-step.update"
+    "onCommand:gherkin-autocomplete.update"
   ],
   "contributes": {
     "commands": [
       {
-        "command": "gherkin-step.update",
+        "command": "gherkin-autocomplete.update",
         "title": "Update steps cache",
         "category": "Update feature"
       }
-    ],
-    "configuration": {
-      "title": "Gherkin Steps Configuration",
-      "properties": {
-        "gherkin-steps.featurespath": {
-          "description": "path to features",
-          "type": "string",
-          "default": "feature"
-        },
-        "specflow-bsl.outDir": {
-          "description": "out dir",
-          "type": "string"
-        }
-      }
-    }
+    ]
   },
   "devDependencies": {
     "@types/node": "^6.0.46",
