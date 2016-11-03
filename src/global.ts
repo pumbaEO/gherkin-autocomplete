@@ -34,25 +34,6 @@ export class Global {
         return entries;
     }
 
-    public getModuleForPath(fullpath: string, rootPath: string): any {
-
-        fullpath = decodeURIComponent(fullpath);
-        let splitsymbol = process.platform === "win32" ? "\\" : "/";
-        if (fullpath.startsWith("file:")) {
-            splitsymbol = "/";
-            if (process.platform === "win32") {
-                fullpath = fullpath.substr(8);
-            } else {
-                fullpath = fullpath.substr(7);
-            }
-        }
-        let module: string = "";
-        return {
-            fullpath,
-            module,
-        };
-    }
-
     public updateCache(): any {
         console.log("update cache");
         this.cacheUpdates = true;
@@ -63,40 +44,26 @@ export class Global {
 
             let files = vscode.workspace.findFiles("**/*.feature", "", 1000);
             files.then((value) => {
-                this.addtocachefiles(value, false);
+                this.addtocachefiles(value);
             }, (reason) => {
                 console.log(reason);
             });
         }
     };
 
-    public queryref(word: string, collection: any, local: boolean = false): any {
-        if (!collection) {
-            return new Array();
-        }
-        let prefix = local ? "" : ".";
-        let querystring = { call: { $regex: new RegExp(prefix + word + "$", "i") } };
-        let search = collection.chain().find(querystring).simplesort("name").data();
-        return search;
-    }
-
-    public querydef(filename: string, module: string, all: boolean = true, lazy: boolean = false): any {
-        // Проверяем локальный кэш.
-        // Проверяем глобальный кэш на модули.
-        // console.log(filename);
+    public query(filename: string, word: string, all: boolean = true, lazy: boolean = false): any {
         if (!this.cacheUpdates) {
             this.updateCache();
             return new Array();
         } else {
             let prefix = lazy ? "" : "^";
             let suffix = all ? "" : "$";
-            let querystring = { module: { $regex: new RegExp(prefix + module + suffix, "i") } };
+            let querystring = { name: { $regex: new RegExp(prefix + word + suffix, "i") } };
             let search = this.db.chain().find(querystring).simplesort("name").data();
             return search;
         }
     }
 
-    public query(filename: string, word: string, module: string, all: boolean = true, lazy: boolean = false): any {
         if (!this.cacheUpdates) {
             this.updateCache();
             return new Array();
@@ -123,7 +90,7 @@ export class Global {
         }
     }
 
-    public fullNameRecursor(word: string, document: vscode.TextDocument, range: vscode.Range, left: boolean) {
+    private fullNameRecursor(word: string, document: vscode.TextDocument, range: vscode.Range, left: boolean) {
         let result: string;
         let plus: number = 1;
         let newRange: vscode.Range;
@@ -168,12 +135,9 @@ export class Global {
         }
     }
 
-    private addtocachefiles(files: Array<vscode.Uri>, isbsl: boolean = false): any {
+    private addtocachefiles(files: Array<vscode.Uri>): any {
         let rootPath = vscode.workspace.rootPath;
         for (let i = 0; i < files.length; ++i) {
-            if (i > 10) {
-                continue;
-            }
             let fullpath = files[i].toString();
             let moduleObj = this.getModuleForPath(fullpath, rootPath);
             fullpath = moduleObj.fullpath;
@@ -194,7 +158,7 @@ export class Global {
                 this.db.insert(newItem);
             }
         }
-        vscode.window.setStatusBarMessage("Обновлен список процедур.", 3000);
+        vscode.window.setStatusBarMessage("Features' cache is built.", 3000);
     }
 
     private parse(source: string, filename: string): any {
@@ -232,31 +196,6 @@ export class Global {
         }
 
         return methods;
-
-        // let ending = "\n";
-        // if (source.indexOf("\r\n") > 0) {
-        //     ending = "\r\n";
-        // }
-        // let name = path.basename(filename, "feature");
-        // let lines = source.split(ending); // "/\r?\n/");
-
-        // for (let index = 0; index < lines.length; index++) {
-        //     let element: string = lines[index].trim();
-        //     if (element.startsWith("#") || element.startsWith("@")) {
-        //         continue;
-        //     }
-        //     if (element.trim().length === 0) { continue; }
-        //     element = element.replace(/'[а-яёa-z\d]+'/i, "");
-        //     let methRow: IMethodValue = {
-        //         description: name,
-        //         endline: index,
-        //         filename,
-        //         line: index,
-        //     };
-
-        //     methods.insert(methRow);
-        // }
-        // return methods;
     }
 }
 interface IMethodValue {
