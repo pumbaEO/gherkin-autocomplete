@@ -20,7 +20,14 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
 
             let bucket = new Array<vscode.CompletionItem>();
             let textLine: vscode.TextLine = document.lineAt(position.line);
-            let TokenMatcher = new Gherkin.TokenMatcher("ru");
+
+            const filename = document.uri.fsPath;
+            const languageInfo = self._global.getLanguageInfo(filename);
+            if (languageInfo == null) {
+                resolve(bucket);
+                return;
+            }
+            let TokenMatcher = new Gherkin.TokenMatcher(languageInfo.language);
 
             let line = new GherkinLine(textLine.text, position.line);
             let token = new Token(line, position.line);
