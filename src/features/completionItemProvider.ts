@@ -29,7 +29,11 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             if (!matches) {
                 return resolve(bucket);
             }
-
+            let wordRange: vscode.Range = document.getWordRangeAtPosition(position);
+            let word2: string = "";
+            if (wordRange) {
+                word2 = document.getText(wordRange);
+            }
             let word: string = token.matchedText.trim();
 
             let firstChar = 0; // textLine.firstNonWhitespaceCharacterIndex;
@@ -40,12 +44,8 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     if (value.name === word) { return; }
                     let item = new vscode.CompletionItem(value.name);
                     item.sortText = "0";
-                    item.insertText = value.name;
-                    item.textEdit = new vscode.TextEdit(
-                        new vscode.Range(position.line, firstChar, position.line, position.character),
-                        value.name
-                    );
-                    item.filterText = value.name;
+                    item.insertText = word2 + value.name.substr(word.length ? word.length: 0);
+                    item.filterText = value.name.replace(/ /g, "").toLowerCase() + " ";
                     item.documentation = value.description;
                     item.kind = vscode.CompletionItemKind.Keyword;
                     bucket.push(item);
@@ -59,17 +59,16 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     let item = new vscode.CompletionItem(value.name);
                     item.insertText = value.name.substr(word.length);
                     item.sortText = "1";
-                    item.insertText = value.name;
-                    item.textEdit = new vscode.TextEdit(
-                        new vscode.Range(position.line, firstChar, position.line, position.character),
-                        value.name
-                    );
+                    item.insertText = word2 + value.name.substr(word.length ? word.length : 0);
+                    item.filterText = value.name.replace(/ /g, "").toLowerCase() + " ";
+                    item.documentation = value.description;
                     item.documentation = value.description;
                     item.kind = vscode.CompletionItemKind.File;
                     bucket.push(item);
                     self.added[(moduleDescription + value.name).toLowerCase()] = true;
                 }
             });
+            //console.log(bucket.length);
             return resolve(bucket);
         });
     }
