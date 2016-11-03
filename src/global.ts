@@ -11,6 +11,7 @@ export class Global {
     private cache: any;
     private db: any;
     private dbcalls: any;
+    private languages: any;
 
     private cacheUpdates: boolean;
 
@@ -41,6 +42,7 @@ export class Global {
         if (rootPath) {
             this.db = this.cache.addCollection("ValueTable");
             this.dbcalls = this.cache.addCollection("Calls");
+            this.languages = this.cache.addCollection("Languages");
 
             let files = vscode.workspace.findFiles("**/*.feature", "", 1000);
             files.then((value) => {
@@ -64,30 +66,17 @@ export class Global {
         }
     }
 
+    public getLanguageInfo(filename: string): ILanguageInfo {
         if (!this.cacheUpdates) {
             this.updateCache();
-            return new Array();
-        } else {
-            let prefix = lazy ? "" : "^";
-            let suffix = all ? "" : "$";
-            let querystring = { name: { $regex: new RegExp(prefix + word + suffix, "i") } };
-            if (module && module.length > 0) {
-                querystring["module"] = { $regex: new RegExp("^" + module + "", "i") };
-            }
-            let moduleRegexp = new RegExp("^" + module + "$", "i");
-            function filterByModule(obj) {
-                if (module && module.length > 0) {
-                    if (moduleRegexp.exec(obj.module) != null) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-                return true;
-            }
-            let search = this.db.chain().find(querystring).where(filterByModule).simplesort("name").data();
-            return search;
+            let languageInfo: ILanguageInfo = {
+                language: "en",
+                name: filename,
+            };
+            return languageInfo;
         }
+
+        return this.languages.findOne({ name: filename });
     }
 
     private fullNameRecursor(word: string, document: vscode.TextDocument, range: vscode.Range, left: boolean) {
@@ -138,9 +127,7 @@ export class Global {
     private addtocachefiles(files: Array<vscode.Uri>): any {
         let rootPath = vscode.workspace.rootPath;
         for (let i = 0; i < files.length; ++i) {
-            let fullpath = files[i].toString();
-            let moduleObj = this.getModuleForPath(fullpath, rootPath);
-            fullpath = moduleObj.fullpath;
+            let fullpath = files[i].fsPath;
             let source = fs.readFileSync(fullpath, "utf-8");
             let entries = this.parse(source, fullpath).find();
             let count = 0;
@@ -165,14 +152,19 @@ export class Global {
 
         let lockdb = new loki("loki.json");
         let methods = lockdb.addCollection("ValueTable");
-        let TokenMatcher = new Gherkin.TokenMatcher("ru");
         let gherkinDocument;
         try {
-            gherkinDocument = parser.parse(source, TokenMatcher);
+            gherkinDocument = parser.parse(source);
         } catch (error) {
             console.log("error parse file " + filename + ":" + error);
             return methods;
         }
+
+        let languageInfo: ILanguageInfo = {
+            language: gherkinDocument.feature.language,
+            name: filename,
+        };
+        this.languages.insert(languageInfo);
 
         const children = gherkinDocument.feature.children;
         for (let index = 0; index < children.length; index++) {
@@ -198,6 +190,7 @@ export class Global {
         return methods;
     }
 }
+
 interface IMethodValue {
 
     name: string;
@@ -210,4 +203,9 @@ interface IMethodValue {
     filename: string;
 
     description?: string;
+}
+
+interface ILanguageInfo {
+    language: string;
+    name: string;
 }
