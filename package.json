@@ -5,10 +5,6 @@
   "icon": "images/SBIcon.png",
   "version": "1.0.0",
   "publisher": "silverbulleters",
-  "galleryBanner": {
-    "color": "#0000FF",
-    "theme": "dark"
-  },
   "license": "SEE LICENSE IN LICENSE.md",
   "bugs": {
     "url": "https://github.com/silverbulleters/gherkin-autocomplete/issues"
