@@ -36,22 +36,27 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             if (!matches) {
                 return resolve(bucket);
             }
-            let wordRange: vscode.Range = document.getWordRangeAtPosition(position);
-            let word2: string = "";
-            if (wordRange) {
-                word2 = document.getText(wordRange);
-            }
-            let word: string = token.matchedText.trim();
+
+            let word: string = token.matchedText;
 
             let firstChar = 0; // textLine.firstNonWhitespaceCharacterIndex;
 
-            let result: Array<any> = self._global.getCacheLocal(document.fileName, word, document.getText(), false);
+            let result: Array<any> = self._global.getCacheLocal(filename, word, document.getText(), false);
             result.forEach((value, index, array) => {
                 if (!self.added[value.name.toLowerCase()] === true) {
                     if (value.name === word) { return; }
                     let item = new vscode.CompletionItem(value.name);
                     item.sortText = "0";
-                    item.insertText = word2 + value.name.substr(word.length ? word.length: 0);
+                    item.insertText = "";
+                    item.textEdit = new vscode.TextEdit(
+                        new vscode.Range(
+                            position.line,
+                            textLine.text.indexOf(token.matchedKeyword) + token.matchedKeyword.length,
+                            position.line,
+                            value.name.length + position.character - token.matchedText.length
+                        ),
+                        value.name
+                    );
                     item.filterText = value.name.replace(/ /g, "").toLowerCase() + " ";
                     item.documentation = value.description;
                     item.kind = vscode.CompletionItemKind.Keyword;
@@ -59,14 +64,22 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     self.added[value.name.toLowerCase()] = true;
                 }
             });
-            result = self._global.query(document.fileName, word, "", true, false);
+            result = self._global.query(filename, word, true, true);
             result.forEach((value, index, array) => {
                 let moduleDescription = "";
                 if (self.added[(moduleDescription + value.name).toLowerCase()] !== true) {
                     let item = new vscode.CompletionItem(value.name);
                     item.insertText = value.name.substr(word.length);
                     item.sortText = "1";
-                    item.insertText = word2 + value.name.substr(word.length ? word.length : 0);
+                    item.textEdit = new vscode.TextEdit(
+                        new vscode.Range(
+                            position.line,
+                            textLine.text.indexOf(token.matchedKeyword) + token.matchedKeyword.length,
+                            position.line,
+                            value.name.length + position.character - token.matchedText.length
+                        ),
+                        value.name
+                    );
                     item.filterText = value.name.replace(/ /g, "").toLowerCase() + " ";
                     item.documentation = value.description;
                     item.documentation = value.description;
