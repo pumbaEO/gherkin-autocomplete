@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
+import { IMethodValue } from "../global";
 
 const Gherkin = require("gherkin");
 const Token = require("./../../../node_modules/gherkin/lib/gherkin/token");
@@ -41,7 +42,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
 
             let firstChar = 0; // textLine.firstNonWhitespaceCharacterIndex;
 
-            let result: Array<any> = self._global.getCacheLocal(filename, word, document.getText(), false);
+            let result: Array<IMethodValue> = self._global.getCacheLocal(filename, word, document.getText(), false);
             result.forEach((value, index, array) => {
                 if (!self.added[value.name.toLowerCase()] === true) {
                     if (value.name === word) { return; }
@@ -58,7 +59,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                         value.name
                     );
                     item.filterText = value.name.replace(/ /g, "").toLowerCase() + " ";
-                    item.documentation = value.description;
+                    item.documentation = value.description ? value.description : "";
                     item.kind = vscode.CompletionItemKind.Keyword;
                     bucket.push(item);
                     self.added[value.name.toLowerCase()] = true;
@@ -81,14 +82,47 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                         value.name
                     );
                     item.filterText = value.name.replace(/ /g, "").toLowerCase() + " ";
-                    item.documentation = value.description;
-                    item.documentation = value.description;
-                    item.kind = vscode.CompletionItemKind.File;
+                    let startFilename = 0;
+                    if (value.filename.length - 100 > 0) {
+                        startFilename = value.filename.length - 100;
+                    }
+                    item.documentation = value.description ? value.description : "" +
+                                        "\n" + value.filename.substr(startFilename) + ":" + value.line;
+                    item.kind = value.kind ? value.kind : vscode.CompletionItemKind.File;
                     bucket.push(item);
                     self.added[(moduleDescription + value.name).toLowerCase()] = true;
                 }
             });
-            //console.log(bucket.length);
+
+            result = self._global.queryAny(filename, word);
+            result.forEach((value, index, array) => {
+                let moduleDescription = "";
+                if (self.added[(moduleDescription + value.name).toLowerCase()] !== true) {
+                    let item = new vscode.CompletionItem(value.name);
+                    item.insertText = value.name.substr(word.length);
+                    item.sortText = "3";
+                    item.textEdit = vscode.TextEdit.replace(
+                        new vscode.Range(
+                            position.line,
+                            textLine.text.indexOf(token.matchedKeyword) + token.matchedKeyword.length,
+                            position.line,
+                            value.name.length + position.character - token.matchedText.length
+                        ),
+                        value.name
+                    );
+                    item.filterText = value.name.replace(/ /g, "").toLowerCase() + " ";
+                    let startFilename = 0;
+                    if (value.filename.length - 100 > 0) {
+                        startFilename = value.filename.length - 100;
+                    }
+                    item.documentation = value.description ? value.description : "" +
+                                        "\n" + value.filename.substr(startFilename) + ":" + value.line;
+                    item.kind = vscode.CompletionItemKind.Property;
+                    item.label = value.name;
+                    bucket.push(item);
+                    self.added[(moduleDescription + value.name).toLowerCase()] = true;
+                }
+            });
             return resolve(bucket);
         });
     }

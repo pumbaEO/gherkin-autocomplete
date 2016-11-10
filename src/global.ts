@@ -1,7 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
+
 let Gherkin = require("gherkin");
 let parser = new Gherkin.Parser();
+let Glob = require("glob");
 
 let loki = require("lokijs");
 
@@ -26,7 +28,7 @@ export class Global {
         source,
         update: boolean = false,
         allToEnd: boolean = true,
-        fromFirst: boolean = true) {
+        fromFirst: boolean = true): Array<IMethodValue> {
 
         let suffix = allToEnd ? "" : "$";
         let prefix = fromFirst ? "^" : "";
@@ -37,18 +39,39 @@ export class Global {
 
     public updateCache(): any {
         this.cacheUpdates = true;
+        this.db = this.cache.addCollection("ValueTable");
+        this.dbcalls = this.cache.addCollection("Calls");
+        this.languages = this.cache.addCollection("Languages");
         let rootPath = vscode.workspace.rootPath;
         if (rootPath) {
-            this.db = this.cache.addCollection("ValueTable");
-            this.dbcalls = this.cache.addCollection("Calls");
-            this.languages = this.cache.addCollection("Languages");
-
             let files = vscode.workspace.findFiles("**/*.feature", "", 1000);
             files.then((value) => {
                 this.addtocachefiles(value);
             }, (reason) => {
                 console.log(reason);
             });
+        }
+
+        let pathsLibrarys: Array<vscode.Uri> =
+                    vscode.workspace.getConfiguration("gherkin-autocomplete")
+                                    .get<Array<vscode.Uri>>("featurelibrary", []);
+        for (let i = 0; i < pathsLibrarys.length; ++i) {
+            let library = pathsLibrarys[i];
+            let globSearch = new Glob(library + "**/*.feature", {},
+                (err, files) => {
+                    if (err) {
+                        console.error(err);
+                        return;
+                    }
+                    for (let i = 0; i < files.length; ++i) {
+                        files[i] = vscode.Uri.file(files[i]);
+                    }
+                    this.addtocachefiles(files);
+                });
+            globSearch.on("end", () => {
+                return;
+            });
+
         }
     };
 
@@ -68,6 +91,24 @@ export class Global {
             let search = this.db.chain().find(querystring).simplesort("name").data();
             return search;
         }
+    }
+
+    public queryAny(filename: string, word: string): any {
+        if (!this.cacheUpdates) {
+            this.updateCache();
+            return new Array();
+        }
+        let words = word.split(" ");
+        let sb: Array<String> = new Array();
+        words.forEach(element => {
+            sb.push("(?=.*");
+            sb.push(element);
+            sb.push(")");
+        });
+        sb.push(".+");
+        let querystring = { name: { $regex: new RegExp(sb.join(""), "i") } };
+        let search = this.db.chain().find(querystring).simplesort("name").data();
+        return search;
     }
 
     public getLanguageInfo(filename: string): ILanguageInfo {
@@ -147,6 +188,7 @@ export class Global {
                 description: item.description,
                 endline: item.endline,
                 filename: fullpath,
+                kind: vscode.CompletionItemKind.Module
                 line: item.line,
                 name: item.description,
             };
@@ -208,7 +250,7 @@ export class Global {
     }
 }
 
-interface IMethodValue {
+export interface IMethodValue {
 
     name: string;
 
@@ -220,6 +262,8 @@ interface IMethodValue {
     filename: string;
 
     description?: string;
+
+    kind?: vscode.CompletionItemKind;
 }
 
 interface ILanguageInfo {

@@ -51,7 +51,17 @@
         "title": "Update steps cache",
         "category": "Gherkin autocomplete"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Gherkin autocomplete",
+      "properties": {
+        "gherkin-autocomplete.featurelibrary": {
+          "description": "feautre library",
+          "type": "array",
+          "default": []
+        }
+      }
+    }
   },
   "devDependencies": {
     "@types/node": "^6.0.46",
@@ -62,6 +72,7 @@
   "dependencies": {
     "fs-readfile-promise": "^3.0.0",
     "gherkin": "^4.0.0",
+    "glob": "^7.1.1",
     "lokijs": "^1.4.1"
   }
 }
