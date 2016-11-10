@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import CompletionItemProvider from "./features/completionItemProvider";
-import {Global} from "./global";
+import { Global } from "./global";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
