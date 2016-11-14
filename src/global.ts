@@ -159,12 +159,21 @@ export class Global {
             console.log("error parse file " + filename + ":" + error);
             return methods;
         }
+        let languageInfo: ILanguageInfo;
+        try {
+            languageInfo = {
+                language: gherkinDocument.feature.language,
+                name: filename,
+            };
+        } catch (error) {
+            console.error("error parse language " + filename + ":" + error)
+            return methods;
+        }
 
-        let languageInfo: ILanguageInfo = {
-            language: gherkinDocument.feature.language,
-            name: filename,
-        };
         this.languages.insert(languageInfo);
+        if (!gherkinDocument.feature["children"]) {
+            return methods;
+        }
 
         const children = gherkinDocument.feature.children;
         for (let index = 0; index < children.length; index++) {
@@ -173,13 +182,14 @@ export class Global {
 
             for (let indexStep = 0; indexStep < steps.length; indexStep++) {
                 const step = steps[indexStep];
-
+                //let text: string = step.text.replace(/".*?"/gi, "\"\"").replace(/'.*?'/gi, "''");
+                let text: string = step.text;
                 let methRow: IMethodValue = {
                     description: step.text,
                     endline: step.location.line,
                     filename,
                     line: step.location.line,
-                    name: step.text,
+                    name: text,
                 };
 
                 methods.insert(methRow);
