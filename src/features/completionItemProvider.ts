@@ -48,7 +48,6 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     if (value.name === word) { return; }
                     let item = new vscode.CompletionItem(value.name);
                     item.sortText = "0";
-                    item.insertText = "";
                     item.textEdit = new vscode.TextEdit(
                         new vscode.Range(
                             position.line,
@@ -67,7 +66,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             });
             result = self._global.query(filename, word, true, true);
             result.forEach((value, index, array) => {
-                let moduleDescription = "";
+                let moduleDescription = ""; 
                 if (self.added[(moduleDescription + value.name).toLowerCase()] !== true) {
                     let item = new vscode.CompletionItem(value.name);
                     item.insertText = value.name.substr(word.length);
@@ -83,10 +82,10 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     );
                     item.filterText = value.name.replace(/ /g, "").toLowerCase() + " ";
                     let startFilename = 0;
-                    if (value.filename.length - 100 > 0) {
-                        startFilename = value.filename.length - 100;
+                    if (value.filename.length - 60 > 0) {
+                        startFilename = value.filename.length - 60;
                     }
-                    item.documentation = value.description ? value.description : "" +
+                    item.documentation = (value.description ? value.description : "") +
                                         "\n" + value.filename.substr(startFilename) + ":" + value.line;
                     item.kind = value.kind ? value.kind : vscode.CompletionItemKind.File;
                     bucket.push(item);
@@ -112,10 +111,10 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     );
                     item.filterText = value.name.replace(/ /g, "").toLowerCase() + " ";
                     let startFilename = 0;
-                    if (value.filename.length - 100 > 0) {
-                        startFilename = value.filename.length - 100;
+                    if (value.filename.length - 60 > 0) {
+                        startFilename = value.filename.length - 60;
                     }
-                    item.documentation = value.description ? value.description : "" +
+                    item.documentation = (value.description ? value.description : "") +
                                         "\n" + value.filename.substr(startFilename) + ":" + value.line;
                     item.kind = vscode.CompletionItemKind.Property;
                     item.label = value.name;
