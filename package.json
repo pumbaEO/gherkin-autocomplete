@@ -3,7 +3,7 @@
   "displayName": "Gherkin step autocomplete",
   "description": "Code extension for automplete of Gherkin Steps in *.feature files",
   "icon": "images/SBIcon.png",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "silverbulleters",
   "license": "SEE LICENSE IN LICENSE.md",
   "bugs": {
