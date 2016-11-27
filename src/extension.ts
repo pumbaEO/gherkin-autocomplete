@@ -10,7 +10,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const global = new Global("global");
     context.subscriptions.push(
-        vscode.languages.registerCompletionItemProvider(["feature", "feature"], new CompletionItemProvider(global), ".")
+        vscode.languages.registerCompletionItemProvider(["feature", "gherkin"], new CompletionItemProvider(global), ".")
     );
 
     context.subscriptions.push(vscode.commands.registerCommand("gherkin-autocomplete.update", () => {

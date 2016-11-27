@@ -41,6 +41,7 @@
   },
   "activationEvents": [
     "onLanguage:feature",
+    "onLanguage:gherkin",
     "onCommand:gherkin-autocomplete.update"
   ],
   "contributes": {
