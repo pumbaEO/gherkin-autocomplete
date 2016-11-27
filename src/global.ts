@@ -36,7 +36,6 @@ export class Global {
     }
 
     public updateCache(): any {
-        console.log("update cache");
         this.cacheUpdates = true;
         let rootPath = vscode.workspace.rootPath;
         if (rootPath) {
@@ -52,6 +51,11 @@ export class Global {
             });
         }
     };
+
+    public updateCacheOfTextDocument(uri): any {
+        this.db.removeWhere((obj) => { return obj.filename = uri.fsPath;});
+        this.addFileToCache(uri);
+    }
 
     public query(filename: string, word: string, all: boolean = true, lazy: boolean = false): any {
         if (!this.cacheUpdates) {
@@ -125,27 +129,30 @@ export class Global {
     }
 
     private addtocachefiles(files: Array<vscode.Uri>): any {
-        let rootPath = vscode.workspace.rootPath;
         for (let i = 0; i < files.length; ++i) {
-            let fullpath = files[i].fsPath;
-            let source = fs.readFileSync(fullpath, "utf-8");
-            let entries = this.parse(source, fullpath).find();
-            let count = 0;
-            for (let y = 0; y < entries.length; ++y) {
-                let item = entries[y];
-                item["filename"] = fullpath;
-                let newItem: IMethodValue = {
-                    description: item.description,
-                    endline: item.endline,
-                    filename: fullpath,
-                    line: item.line,
-                    name: item.description,
-                };
-                ++count;
-                this.db.insert(newItem);
-            }
+            this.addFileToCache(files[i]);
         }
         vscode.window.setStatusBarMessage("Features' cache is built.", 3000);
+    }
+
+    private addFileToCache(uri: vscode.Uri) {
+        let fullpath = uri.fsPath;
+        let source = fs.readFileSync(fullpath, "utf-8");
+        let entries = this.parse(source, fullpath).find();
+        let count = 0;
+        for (let y = 0; y < entries.length; ++y) {
+            let item = entries[y];
+            item["filename"] = fullpath;
+            let newItem: IMethodValue = {
+                description: item.description,
+                endline: item.endline,
+                filename: fullpath,
+                line: item.line,
+                name: item.description,
+            };
+            ++count;
+            this.db.insert(newItem);
+        }
     }
 
     private parse(source: string, filename: string): any {

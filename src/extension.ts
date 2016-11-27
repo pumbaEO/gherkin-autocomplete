@@ -17,5 +17,9 @@ export function activate(context: vscode.ExtensionContext) {
         global.updateCache();
     }));
 
+    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument( (document: vscode.TextDocument) => {
+            global.updateCacheOfTextDocument(document.uri);
+    }));
+
     global.updateCache();
 }
