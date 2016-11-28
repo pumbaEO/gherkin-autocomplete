@@ -2,6 +2,8 @@ import * as fs from "fs";
 import * as glob from "glob";
 import * as vscode from "vscode";
 
+import { IMethodValue } from "./IMethodValue";
+
 let Gherkin = require("gherkin");
 let parser = new Gherkin.Parser();
 
@@ -246,22 +248,6 @@ export class Global {
 
         return methods;
     }
-}
-
-export interface IMethodValue {
-
-    name: string;
-
-    // начало
-    line: number;
-    // конец процедуры
-    endline: number;
-
-    filename: string;
-
-    description?: string;
-
-    kind?: vscode.CompletionItemKind;
 }
 
 interface ILanguageInfo {

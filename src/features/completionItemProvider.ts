@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
+
+import { IMethodValue } from "../IMethodValue";
 import AbstractProvider from "./abstractProvider";
-import { IMethodValue } from "../global";
 
 const Gherkin = require("gherkin");
 const Token = require("./../../../node_modules/gherkin/lib/gherkin/token");
