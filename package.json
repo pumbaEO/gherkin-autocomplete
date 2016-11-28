@@ -55,7 +55,7 @@
     "configuration": {
       "title": "Gherkin autocomplete",
       "properties": {
-        "gherkin-autocomplete.featureLibrary": {
+        "gherkin-autocomplete.featureLibraries": {
           "description": "Array of external libraries of features",
           "type": "array",
           "default": []

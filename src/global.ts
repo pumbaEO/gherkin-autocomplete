@@ -64,7 +64,7 @@ export class Global {
 
         let pathsLibrarys: Array<string> =
             vscode.workspace.getConfiguration("gherkin-autocomplete")
-                .get<Array<string>>("featureLibrary", []);
+                .get<Array<string>>("featureLibraries", []);
         for (let i = 0; i < pathsLibrarys.length; ++i) {
             let library = pathsLibrarys[i];
             if (!(library.endsWith("/") || library.endsWith("\\"))) {
