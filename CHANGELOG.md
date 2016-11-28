@@ -1,3 +1,15 @@
+## 1.1.0
+
+**Implemented features:**
+
+* Introduce of new settings:
+    * `gherkin-autocomplete.featuresPath` - Relative path to features directory. Default value is `"features"`
+    * `gherkin-autocomplete.featureLibraries` - Array of directories with external libraries of features
+
+**Fixed bugs:**
+
+* Saving of feature file may lead to cache loss of adjacent files
+
 ## 1.0.2
 
 **Fixed bugs:**
