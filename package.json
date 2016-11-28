@@ -60,7 +60,7 @@
           "type": "array",
           "default": []
         },
-        "gherkin-autocomplete.featurePath": {
+        "gherkin-autocomplete.featuresPath": {
           "description": "Relative path to features directory.",
           "type": "string",
           "default": "features"

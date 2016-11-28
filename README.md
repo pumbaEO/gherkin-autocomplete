@@ -22,7 +22,7 @@ Example:
     ]
 ```  
 
-* `gherkin-autocomplete.featurePath`  
+* `gherkin-autocomplete.featuresPath`  
 Relative path to features directory.  
 Type: String   
 Default value: `"features"`.
