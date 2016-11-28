@@ -55,13 +55,13 @@
     "configuration": {
       "title": "Gherkin autocomplete",
       "properties": {
-        "gherkin-autocomplete.featurelibrary": {
-          "description": "feautre library",
+        "gherkin-autocomplete.featureLibrary": {
+          "description": "Array of external libraries of features",
           "type": "array",
           "default": []
         },
         "gherkin-autocomplete.featurePath": {
-          "description": "feautre path",
+          "description": "Relative path to features directory.",
           "type": "string",
           "default": "feature"
         }
