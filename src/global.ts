@@ -108,7 +108,7 @@ export class Global {
         }
     }
 
-    public queryAny(filename: string, word: string): any {
+    public queryAny(word: string): any {
         if (!this.cacheUpdates) {
             this.updateCache();
             return new Array();

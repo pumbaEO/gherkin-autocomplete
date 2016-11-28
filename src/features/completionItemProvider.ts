@@ -92,7 +92,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 }
             });
 
-            result = self._global.queryAny(filename, word);
+            result = self._global.queryAny(word);
             result.forEach((value, index, array) => {
                 let moduleDescription = "";
                 if (self.added[(moduleDescription + value.name).toLowerCase()] !== true) {
