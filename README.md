@@ -3,6 +3,7 @@
 [![Join the chat at https://gitter.im/silverbulleters/gherkin-autocomplete](https://badges.gitter.im/silverbulleters/gherkin-autocomplete.svg)](https://gitter.im/silverbulleters/gherkin-autocomplete?utm_source=badge&utm_medium=badge&utm_content=badge)
 [![GitHub release](https://img.shields.io/github/release/silverbulleters/gherkin-autocomplete.svg)](https://github.com/silverbulleters/gherkin-autocomplete/blob/master/CHANGELOG.md)
 [![Dependency Status](https://gemnasium.com/badges/github.com/silverbulleters/gherkin-autocomplete.svg)](https://gemnasium.com/github.com/silverbulleters/gherkin-autocomplete)
+[![SonarQube Tech Debt](https://img.shields.io/sonar/https/sonar.silverbulleters.org/gherkin-autocomplete/tech_debt.svg)](https://sonar.silverbulleters.org/dashboard/index/115459)
 
 Autocomplete of gherkin steps from all features in you workspace.  
 Scans all `*.feature` files and creates a database with simple fuzzy search.
