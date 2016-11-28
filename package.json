@@ -53,17 +53,17 @@
       }
     ],
     "configuration": {
-      "title": "Gherkin autocomplete",
+      "title": "Gherkin autocomplete configuration",
       "properties": {
         "gherkin-autocomplete.featureLibraries": {
-          "description": "Array of external libraries of features",
+          "description": "Array of directories with external libraries of features",
           "type": "array",
           "default": []
         },
         "gherkin-autocomplete.featurePath": {
           "description": "Relative path to features directory.",
           "type": "string",
-          "default": "feature"
+          "default": "features"
         }
       }
     }
