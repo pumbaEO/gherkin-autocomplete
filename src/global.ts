@@ -91,7 +91,7 @@ export class Global {
     };
 
     public updateCacheOfTextDocument(uri): any {
-        this.db.removeWhere((obj) => { return obj.filename = uri.fsPath;});
+        this.db.removeWhere((obj) => { return obj.filename === uri.fsPath; });
         this.addFileToCache(uri);
     }
 
