@@ -74,6 +74,9 @@ export class Global {
             let globOptions: glob.IOptions = {};
             globOptions.dot = true;
             globOptions.cwd = vscode.workspace.rootPath;
+            // glob >=7.0.0 contains this property
+            // tslint:disable-next-line:no-string-literal
+            globOptions["absolute"] = true;
             glob(library, globOptions, (err, files) => {
                     if (err) {
                         console.error(err);
