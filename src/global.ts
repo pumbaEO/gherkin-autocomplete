@@ -1,13 +1,11 @@
 import * as fs from "fs";
-import * as path from "path";
+import * as glob from "glob";
+import * as vscode from "vscode";
 
 let Gherkin = require("gherkin");
 let parser = new Gherkin.Parser();
-let Glob = require("glob");
 
 let loki = require("lokijs");
-
-import * as vscode from "vscode";
 
 export class Global {
     private cache: any;
@@ -52,13 +50,19 @@ export class Global {
             });
         }
 
-        let pathsLibrarys: Array<vscode.Uri> =
-                    vscode.workspace.getConfiguration("gherkin-autocomplete")
-                                    .get<Array<vscode.Uri>>("featurelibrary", []);
+        let pathsLibrarys: Array<string> =
+            vscode.workspace.getConfiguration("gherkin-autocomplete")
+                .get<Array<string>>("featurelibrary", []);
         for (let i = 0; i < pathsLibrarys.length; ++i) {
             let library = pathsLibrarys[i];
-            let globSearch = new Glob(library + "**/*.feature", {},
-                (err, files) => {
+            if (!(library.endsWith("/") || library.endsWith("\\"))) {
+                library += "/";
+            }
+            library += "**/*.feature";
+            let globOptions: glob.IOptions = {};
+            globOptions.dot = true;
+            globOptions.cwd = vscode.workspace.rootPath;
+            glob(library, globOptions, (err, files) => {
                     if (err) {
                         console.error(err);
                         return;
@@ -68,10 +72,6 @@ export class Global {
                     }
                     this.addtocachefiles(files);
                 });
-            globSearch.on("end", () => {
-                return;
-            });
-
         }
     };
 
@@ -183,12 +183,11 @@ export class Global {
         let count = 0;
         for (let y = 0; y < entries.length; ++y) {
             let item = entries[y];
-            item["filename"] = fullpath;
             let newItem: IMethodValue = {
                 description: item.description,
                 endline: item.endline,
                 filename: fullpath,
-                kind: vscode.CompletionItemKind.Module
+                kind: vscode.CompletionItemKind.Module,
                 line: item.line,
                 name: item.description,
             };
@@ -215,12 +214,12 @@ export class Global {
                 name: filename,
             };
         } catch (error) {
-            console.error("error parse language " + filename + ":" + error)
+            console.error("error parse language " + filename + ":" + error);
             return methods;
         }
 
         this.languages.insert(languageInfo);
-        if (!gherkinDocument.feature["children"]) {
+        if (!gherkinDocument.feature.children) {
             return methods;
         }
 
@@ -231,7 +230,6 @@ export class Global {
 
             for (let indexStep = 0; indexStep < steps.length; indexStep++) {
                 const step = steps[indexStep];
-                //let text: string = step.text.replace(/".*?"/gi, "\"\"").replace(/'.*?'/gi, "''");
                 let text: string = step.text;
                 let methRow: IMethodValue = {
                     description: step.text,

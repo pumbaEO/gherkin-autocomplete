@@ -12,7 +12,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
     public provideCompletionItems(
         document: vscode.TextDocument,
         position: vscode.Position,
-        token: vscode.CancellationToken): Thenable<vscode.CompletionItem[]> {
+        cansellationToken: vscode.CancellationToken): Thenable<vscode.CompletionItem[]> {
 
         let self = this;
         this.added = {};
@@ -40,8 +40,6 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
 
             let word: string = token.matchedText;
 
-            let firstChar = 0; // textLine.firstNonWhitespaceCharacterIndex;
-
             let result: Array<IMethodValue> = self._global.getCacheLocal(filename, word, document.getText(), false);
             result.forEach((value, index, array) => {
                 if (!self.added[value.name.toLowerCase()] === true) {
@@ -66,7 +64,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             });
             result = self._global.query(filename, word, true, true);
             result.forEach((value, index, array) => {
-                let moduleDescription = ""; 
+                let moduleDescription = "";
                 if (self.added[(moduleDescription + value.name).toLowerCase()] !== true) {
                     let item = new vscode.CompletionItem(value.name);
                     item.insertText = value.name.substr(word.length);
