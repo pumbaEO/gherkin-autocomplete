@@ -1,11 +1,13 @@
 import * as fs from "fs";
-import * as path from "path";
+import * as glob from "glob";
+import * as vscode from "vscode";
+
+import { IMethodValue } from "./IMethodValue";
+
 let Gherkin = require("gherkin");
 let parser = new Gherkin.Parser();
 
 let loki = require("lokijs");
-
-import * as vscode from "vscode";
 
 export class Global {
     private cache: any;
@@ -26,7 +28,7 @@ export class Global {
         source,
         update: boolean = false,
         allToEnd: boolean = true,
-        fromFirst: boolean = true) {
+        fromFirst: boolean = true): Array<IMethodValue> {
 
         let suffix = allToEnd ? "" : "$";
         let prefix = fromFirst ? "^" : "";
@@ -37,23 +39,59 @@ export class Global {
 
     public updateCache(): any {
         this.cacheUpdates = true;
+        this.db = this.cache.addCollection("ValueTable");
+        this.dbcalls = this.cache.addCollection("Calls");
+        this.languages = this.cache.addCollection("Languages");
         let rootPath = vscode.workspace.rootPath;
         if (rootPath) {
-            this.db = this.cache.addCollection("ValueTable");
-            this.dbcalls = this.cache.addCollection("Calls");
-            this.languages = this.cache.addCollection("Languages");
-
-            let files = vscode.workspace.findFiles("**/*.feature", "", 1000);
-            files.then((value) => {
-                this.addtocachefiles(value);
+            let featurePath = String(vscode.workspace.getConfiguration("gherkin-autocomplete").get("featurePath"));
+            if (featurePath) {
+                if (!(featurePath.endsWith("/") || featurePath.endsWith("\\"))) {
+                    featurePath += "/";
+                }
+            }
+            featurePath += "**/*.feature";
+            let files = vscode.workspace.findFiles(featurePath, "", 1000);
+            files.then((values) => {
+                for (let value of values) {
+                    this.addFileToCache(value);
+                }
+                vscode.window.setStatusBarMessage("Features' cache is built.", 3000);
             }, (reason) => {
                 console.log(reason);
             });
         }
+
+        let pathsLibrarys: Array<string> =
+            vscode.workspace.getConfiguration("gherkin-autocomplete")
+                .get<Array<string>>("featureLibraries", []);
+        for (let i = 0; i < pathsLibrarys.length; ++i) {
+            let library = pathsLibrarys[i];
+            if (!(library.endsWith("/") || library.endsWith("\\"))) {
+                library += "/";
+            }
+            library += "**/*.feature";
+            let globOptions: glob.IOptions = {};
+            globOptions.dot = true;
+            globOptions.cwd = vscode.workspace.rootPath;
+            // glob >=7.0.0 contains this property
+            // tslint:disable-next-line:no-string-literal
+            globOptions["absolute"] = true;
+            glob(library, globOptions, (err, files) => {
+                    if (err) {
+                        console.error(err);
+                        return;
+                    }
+                    for (let file of files) {
+                        this.addFileToCache(vscode.Uri.file(file));
+                    }
+                    vscode.window.setStatusBarMessage("Feature libraries cache is built.", 3000);
+                });
+        }
     };
 
     public updateCacheOfTextDocument(uri): any {
-        this.db.removeWhere((obj) => { return obj.filename = uri.fsPath;});
+        this.db.removeWhere((obj) => { return obj.filename === uri.fsPath; });
         this.addFileToCache(uri);
     }
 
@@ -68,6 +106,24 @@ export class Global {
             let search = this.db.chain().find(querystring).simplesort("name").data();
             return search;
         }
+    }
+
+    public queryAny(word: string): any {
+        if (!this.cacheUpdates) {
+            this.updateCache();
+            return new Array();
+        }
+        let words = word.split(" ");
+        let sb: Array<String> = new Array();
+        words.forEach(element => {
+            sb.push("(?=.*");
+            sb.push(element);
+            sb.push(")");
+        });
+        sb.push(".+");
+        let querystring = { name: { $regex: new RegExp(sb.join(""), "i") } };
+        let search = this.db.chain().find(querystring).simplesort("name").data();
+        return search;
     }
 
     public getLanguageInfo(filename: string): ILanguageInfo {
@@ -128,13 +184,6 @@ export class Global {
         }
     }
 
-    private addtocachefiles(files: Array<vscode.Uri>): any {
-        for (let i = 0; i < files.length; ++i) {
-            this.addFileToCache(files[i]);
-        }
-        vscode.window.setStatusBarMessage("Features' cache is built.", 3000);
-    }
-
     private addFileToCache(uri: vscode.Uri) {
         let fullpath = uri.fsPath;
         let source = fs.readFileSync(fullpath, "utf-8");
@@ -142,11 +191,11 @@ export class Global {
         let count = 0;
         for (let y = 0; y < entries.length; ++y) {
             let item = entries[y];
-            item["filename"] = fullpath;
             let newItem: IMethodValue = {
                 description: item.description,
                 endline: item.endline,
                 filename: fullpath,
+                kind: vscode.CompletionItemKind.Module,
                 line: item.line,
                 name: item.description,
             };
@@ -173,12 +222,12 @@ export class Global {
                 name: filename,
             };
         } catch (error) {
-            console.error("error parse language " + filename + ":" + error)
+            console.error("error parse language " + filename + ":" + error);
             return methods;
         }
 
         this.languages.insert(languageInfo);
-        if (!gherkinDocument.feature["children"]) {
+        if (!gherkinDocument.feature.children) {
             return methods;
         }
 
@@ -189,7 +238,6 @@ export class Global {
 
             for (let indexStep = 0; indexStep < steps.length; indexStep++) {
                 const step = steps[indexStep];
-                //let text: string = step.text.replace(/".*?"/gi, "\"\"").replace(/'.*?'/gi, "''");
                 let text: string = step.text;
                 let methRow: IMethodValue = {
                     description: step.text,
@@ -206,20 +254,6 @@ export class Global {
 
         return methods;
     }
-}
-
-interface IMethodValue {
-
-    name: string;
-
-    // начало
-    line: number;
-    // конец процедуры
-    endline: number;
-
-    filename: string;
-
-    description?: string;
 }
 
 interface ILanguageInfo {

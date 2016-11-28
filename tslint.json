@@ -1,6 +1,10 @@
 {
 	"extends": "tslint:latest",
 	"rules": {
-		"semicolon": ["always"]
+		"semicolon": ["always"],
+		"no-var-requires": false,
+		"no-console": [
+			false
+		]
 	}
 }

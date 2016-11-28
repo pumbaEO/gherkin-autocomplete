@@ -51,17 +51,34 @@
         "title": "Update steps cache",
         "category": "Gherkin autocomplete"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Gherkin autocomplete configuration",
+      "properties": {
+        "gherkin-autocomplete.featureLibraries": {
+          "description": "Array of directories with external libraries of features",
+          "type": "array",
+          "default": []
+        },
+        "gherkin-autocomplete.featurePath": {
+          "description": "Relative path to features directory.",
+          "type": "string",
+          "default": "features"
+        }
+      }
+    }
   },
   "devDependencies": {
-    "@types/node": "^6.0.46",
+    "@types/glob": "^5.0.30",
+    "@types/node": "^6.0.51",
     "tslint": "^3.15.1",
-    "typescript": "^2.0.9",
+    "typescript": "^2.0.10",
     "vscode": "^1.0.3"
   },
   "dependencies": {
     "fs-readfile-promise": "^3.0.0",
     "gherkin": "^4.0.0",
+    "glob": "^7.1.1",
     "lokijs": "^1.4.1"
   }
 }
