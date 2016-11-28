@@ -44,14 +44,14 @@ export class Global {
         this.languages = this.cache.addCollection("Languages");
         let rootPath = vscode.workspace.rootPath;
         if (rootPath) {
-            let featurePath = String(vscode.workspace.getConfiguration("gherkin-autocomplete").get("featurePath"));
-            if (featurePath) {
-                if (!(featurePath.endsWith("/") || featurePath.endsWith("\\"))) {
-                    featurePath += "/";
+            let featuresPath = String(vscode.workspace.getConfiguration("gherkin-autocomplete").get("featuresPath"));
+            if (featuresPath) {
+                if (!(featuresPath.endsWith("/") || featuresPath.endsWith("\\"))) {
+                    featuresPath += "/";
                 }
             }
-            featurePath += "**/*.feature";
-            let files = vscode.workspace.findFiles(featurePath, "", 1000);
+            featuresPath += "**/*.feature";
+            let files = vscode.workspace.findFiles(featuresPath, "", 1000);
             files.then((values) => {
                 for (let value of values) {
                     this.addFileToCache(value);
