@@ -59,6 +59,11 @@
           "description": "feautre library",
           "type": "array",
           "default": []
+        },
+        "gherkin-autocomplete.featurePath": {
+          "description": "feautre path",
+          "type": "string",
+          "default": "feature"
         }
       }
     }

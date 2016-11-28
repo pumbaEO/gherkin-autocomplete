@@ -44,9 +44,19 @@ export class Global {
         this.languages = this.cache.addCollection("Languages");
         let rootPath = vscode.workspace.rootPath;
         if (rootPath) {
-            let files = vscode.workspace.findFiles("**/*.feature", "", 1000);
-            files.then((value) => {
-                this.addtocachefiles(value);
+            let featurePath = String(vscode.workspace.getConfiguration("gherkin-autocomplete").get("featurePath"));
+            if (featurePath) {
+                if (!(featurePath.endsWith("/") || featurePath.endsWith("\\"))) {
+                    featurePath += "/";
+                }
+            }
+            featurePath += "**/*.feature";
+            let files = vscode.workspace.findFiles(featurePath, "", 1000);
+            files.then((values) => {
+                for (let value of values) {
+                    this.addFileToCache(value);
+                }
+                vscode.window.setStatusBarMessage("Features' cache is built.", 3000);
             }, (reason) => {
                 console.log(reason);
             });
@@ -69,10 +79,10 @@ export class Global {
                         console.error(err);
                         return;
                     }
-                    for (let i = 0; i < files.length; ++i) {
-                        files[i] = vscode.Uri.file(files[i]);
+                    for (let file of files) {
+                        this.addFileToCache(vscode.Uri.file(file));
                     }
-                    this.addtocachefiles(files);
+                    vscode.window.setStatusBarMessage("Feature libraries cache is built.", 3000);
                 });
         }
     };
@@ -169,13 +179,6 @@ export class Global {
             result = word;
             return result;
         }
-    }
-
-    private addtocachefiles(files: Array<vscode.Uri>): any {
-        for (let i = 0; i < files.length; ++i) {
-            this.addFileToCache(files[i]);
-        }
-        vscode.window.setStatusBarMessage("Features' cache is built.", 3000);
     }
 
     private addFileToCache(uri: vscode.Uri) {
