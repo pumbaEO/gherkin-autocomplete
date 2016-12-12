@@ -62,11 +62,10 @@ export class Global {
             });
         }
 
-        let pathsLibrarys: Array<string> =
+        let pathsLibrarys: string[] =
             vscode.workspace.getConfiguration("gherkin-autocomplete")
-                .get<Array<string>>("featureLibraries", []);
-        for (let i = 0; i < pathsLibrarys.length; ++i) {
-            let library = pathsLibrarys[i];
+                .get<string[]>("featureLibraries", []);
+        for (let library of pathsLibrarys) {
             if (!(library.endsWith("/") || library.endsWith("\\"))) {
                 library += "/";
             }
@@ -114,8 +113,8 @@ export class Global {
             return new Array();
         }
         let words = word.split(" ");
-        let sb: Array<String> = new Array();
-        words.forEach(element => {
+        let sb: String[] = new Array();
+        words.forEach( (element) => {
             sb.push("(?=.*");
             sb.push(element);
             sb.push(")");
@@ -189,8 +188,7 @@ export class Global {
         let source = fs.readFileSync(fullpath, "utf-8");
         let entries = this.parse(source, fullpath).find();
         let count = 0;
-        for (let y = 0; y < entries.length; ++y) {
-            let item = entries[y];
+        for (let item of entries) {
             let newItem: IMethodValue = {
                 description: item.description,
                 endline: item.endline,
@@ -232,12 +230,10 @@ export class Global {
         }
 
         const children = gherkinDocument.feature.children;
-        for (let index = 0; index < children.length; index++) {
-            const child = children[index];
+        for (let child of children) {
             const steps = child.steps;
 
-            for (let indexStep = 0; indexStep < steps.length; indexStep++) {
-                const step = steps[indexStep];
+            for (let step of steps) {
                 let text: string = step.text;
                 let methRow: IMethodValue = {
                     description: step.text,
