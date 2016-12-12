@@ -1,3 +1,9 @@
+## 1.1.1
+
+**Fixed bugs:**
+
+* Ingore case on features search
+
 ## 1.1.0
 
 **Implemented features:**
