@@ -51,15 +51,7 @@ export class Global {
                 }
             }
             featuresPath += "**/*.feature";
-            let files = vscode.workspace.findFiles(featuresPath, "", 1000);
-            files.then((values) => {
-                for (let value of values) {
-                    this.addFileToCache(value);
-                }
-                vscode.window.setStatusBarMessage("Features' cache is built.", 3000);
-            }, (reason) => {
-                console.log(reason);
-            });
+            this.findFilesForUpdate(featuresPath, "Features' cache is built.");
         }
 
         let pathsLibrarys: string[] =
@@ -70,22 +62,7 @@ export class Global {
                 library += "/";
             }
             library += "**/*.feature";
-            let globOptions: glob.IOptions = {};
-            globOptions.dot = true;
-            globOptions.cwd = vscode.workspace.rootPath;
-            // glob >=7.0.0 contains this property
-            // tslint:disable-next-line:no-string-literal
-            globOptions["absolute"] = true;
-            glob(library, globOptions, (err, files) => {
-                    if (err) {
-                        console.error(err);
-                        return;
-                    }
-                    for (let file of files) {
-                        this.addFileToCache(vscode.Uri.file(file));
-                    }
-                    vscode.window.setStatusBarMessage("Feature libraries cache is built.", 3000);
-                });
+            this.findFilesForUpdate(library, "Feature libraries cache is built.");
         }
     };
 
@@ -136,6 +113,26 @@ export class Global {
         }
 
         return this.languages.findOne({ name: filename });
+    }
+
+    private findFilesForUpdate(library: string, successMessage: string): void {
+        let globOptions: glob.IOptions = {};
+        globOptions.dot = true;
+        globOptions.cwd = vscode.workspace.rootPath;
+        globOptions.nocase = true;
+        // glob >=7.0.0 contains this property
+        // tslint:disable-next-line:no-string-literal
+        globOptions["absolute"] = true;
+        glob(library, globOptions, (err, files) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            for (let file of files) {
+                this.addFileToCache(vscode.Uri.file(file));
+            }
+            vscode.window.setStatusBarMessage(successMessage, 3000);
+        });
     }
 
     private fullNameRecursor(word: string, document: vscode.TextDocument, range: vscode.Range, left: boolean) {
