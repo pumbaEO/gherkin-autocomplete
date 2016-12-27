@@ -1,3 +1,9 @@
+## 1.1.2
+
+**Fixed bugs:**
+
+* Can't find features via relative paths or on non-system disk
+
 ## 1.1.1
 
 **Fixed bugs:**
