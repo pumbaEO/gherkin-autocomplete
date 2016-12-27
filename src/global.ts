@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as glob from "glob";
+import * as path from "path";
 import * as vscode from "vscode";
 
 import { IMethodValue } from "./IMethodValue";
@@ -50,7 +51,7 @@ export class Global {
                     featuresPath += "/";
                 }
             }
-            featuresPath += "**/*.feature";
+            featuresPath = path.resolve(vscode.workspace.rootPath, featuresPath);
             this.findFilesForUpdate(featuresPath, "Features' cache is built.");
         }
 
@@ -61,7 +62,7 @@ export class Global {
             if (!(library.endsWith("/") || library.endsWith("\\"))) {
                 library += "/";
             }
-            library += "**/*.feature";
+            library = path.resolve(vscode.workspace.rootPath, library);
             this.findFilesForUpdate(library, "Feature libraries cache is built.");
         }
     };
@@ -118,12 +119,12 @@ export class Global {
     private findFilesForUpdate(library: string, successMessage: string): void {
         let globOptions: glob.IOptions = {};
         globOptions.dot = true;
-        globOptions.cwd = vscode.workspace.rootPath;
+        globOptions.cwd = library;
         globOptions.nocase = true;
         // glob >=7.0.0 contains this property
         // tslint:disable-next-line:no-string-literal
         globOptions["absolute"] = true;
-        glob(library, globOptions, (err, files) => {
+        glob("**/*.feature", globOptions, (err, files) => {
             if (err) {
                 console.error(err);
                 return;
