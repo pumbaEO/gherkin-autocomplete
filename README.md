@@ -17,7 +17,7 @@ Format: Relative ot absolute path to directory with feature-files.
 Default value: `[]`.  
 Example:
 ```json
-    "gherkin-autocomplete.featureLibraries" = [
+    "gherkin-autocomplete.featureLibraries": [
         "tools/vanessa-behavior/features/Libraries",
         "lib/MyCompanyFeaturesLibrary"
     ]
