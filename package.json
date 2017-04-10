@@ -72,7 +72,7 @@
     "@types/glob": "^5.0.30",
     "@types/node": "^7.0.8",
     "tslib": "^1.4.0",
-    "tslint": "^4.2.0",
+    "tslint": "^5.0.0",
     "typescript": "^2.1.4",
     "vscode": "^1.0.3"
   },
