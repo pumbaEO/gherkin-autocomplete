@@ -78,7 +78,7 @@
   },
   "dependencies": {
     "fs-readfile-promise": "^3.0.0",
-    "gherkin": "^4.0.0",
+    "gherkin": "^4.1.1",
     "glob": "^7.1.1",
     "lokijs": "^1.4.2"
   }
