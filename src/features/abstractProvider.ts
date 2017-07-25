@@ -1,5 +1,5 @@
-import {Global} from "../global";
 import {Disposable} from "vscode";
+import {Global} from "../global";
 
 export default class AbstractProvider {
 
@@ -13,7 +13,7 @@ export default class AbstractProvider {
 
     public dispose() {
         while (this._disposables.length) {
-            let disposable = this._disposables.pop();
+            const disposable = this._disposables.pop();
             if (disposable) {
                 disposable.dispose();
             }

@@ -8,44 +8,43 @@ const Token = require("./../../../node_modules/gherkin/lib/gherkin/token");
 const GherkinLine = require("./../../../node_modules/gherkin/lib/gherkin/gherkin_line");
 
 export default class GlobalCompletionItemProvider extends AbstractProvider implements vscode.CompletionItemProvider {
-    private added: Object;
+    private added: object;
 
     public provideCompletionItems(
         document: vscode.TextDocument,
         position: vscode.Position,
         cansellationToken: vscode.CancellationToken): Thenable<vscode.CompletionItem[]> {
 
-        let self = this;
         this.added = {};
 
         return new Promise((resolve, reject) => {
 
-            let bucket = new Array<vscode.CompletionItem>();
-            let textLine: vscode.TextLine = document.lineAt(position.line);
+            const bucket = new Array<vscode.CompletionItem>();
+            const textLine: vscode.TextLine = document.lineAt(position.line);
 
             const filename = document.uri.fsPath;
-            const languageInfo = self._global.getLanguageInfo(filename);
+            const languageInfo = this._global.getLanguageInfo(filename);
             if (languageInfo == null) {
                 resolve(bucket);
                 return;
             }
-            let TokenMatcher = new Gherkin.TokenMatcher(languageInfo.language);
+            const TokenMatcher = new Gherkin.TokenMatcher(languageInfo.language);
 
-            let line = new GherkinLine(textLine.text, position.line);
-            let token = new Token(line, position.line);
-            let matches: Boolean = TokenMatcher.match_StepLine(token);
+            const line = new GherkinLine(textLine.text, position.line);
+            const token = new Token(line, position.line);
+            const matches: boolean = TokenMatcher.match_StepLine(token);
 
             if (!matches) {
                 return resolve(bucket);
             }
 
-            let word: string = token.matchedText;
+            const word: string = token.matchedText;
 
-            let result: Array<IMethodValue> = self._global.getCacheLocal(filename, word, document.getText(), false);
+            let result: IMethodValue[] = this._global.getCacheLocal(filename, word, document.getText(), false);
             result.forEach((value, index, array) => {
-                if (!self.added[value.name.toLowerCase()] === true) {
+                if (!this.added[value.name.toLowerCase()] === true) {
                     if (value.name === word) { return; }
-                    let item = new vscode.CompletionItem(value.name);
+                    const item = new vscode.CompletionItem(value.name);
                     item.sortText = "0";
                     item.textEdit = new vscode.TextEdit(
                         new vscode.Range(
@@ -60,14 +59,14 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     item.documentation = value.description ? value.description : "";
                     item.kind = vscode.CompletionItemKind.Keyword;
                     bucket.push(item);
-                    self.added[value.name.toLowerCase()] = true;
+                    this.added[value.name.toLowerCase()] = true;
                 }
             });
-            result = self._global.query(filename, word, true, true);
+            result = this._global.query(filename, word, true, true);
             result.forEach((value, index, array) => {
-                let moduleDescription = "";
-                if (self.added[(moduleDescription + value.name).toLowerCase()] !== true) {
-                    let item = new vscode.CompletionItem(value.name);
+                const moduleDescription = "";
+                if (this.added[(moduleDescription + value.name).toLowerCase()] !== true) {
+                    const item = new vscode.CompletionItem(value.name);
                     item.insertText = value.name.substr(word.length);
                     item.sortText = "1";
                     item.textEdit = new vscode.TextEdit(
@@ -88,15 +87,15 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                                         "\n" + value.filename.substr(startFilename) + ":" + value.line;
                     item.kind = value.kind ? value.kind : vscode.CompletionItemKind.File;
                     bucket.push(item);
-                    self.added[(moduleDescription + value.name).toLowerCase()] = true;
+                    this.added[(moduleDescription + value.name).toLowerCase()] = true;
                 }
             });
 
-            result = self._global.queryAny(word);
+            result = this._global.queryAny(word);
             result.forEach((value, index, array) => {
-                let moduleDescription = "";
-                if (self.added[(moduleDescription + value.name).toLowerCase()] !== true) {
-                    let item = new vscode.CompletionItem(value.name);
+                const moduleDescription = "";
+                if (this.added[(moduleDescription + value.name).toLowerCase()] !== true) {
+                    const item = new vscode.CompletionItem(value.name);
                     item.insertText = value.name.substr(word.length);
                     item.sortText = "3";
                     item.textEdit = vscode.TextEdit.replace(
@@ -118,7 +117,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     item.kind = vscode.CompletionItemKind.Property;
                     item.label = value.name;
                     bucket.push(item);
-                    self.added[(moduleDescription + value.name).toLowerCase()] = true;
+                    this.added[(moduleDescription + value.name).toLowerCase()] = true;
                 }
             });
             return resolve(bucket);

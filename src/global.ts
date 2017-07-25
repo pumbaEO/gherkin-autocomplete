@@ -5,10 +5,10 @@ import * as vscode from "vscode";
 
 import { IMethodValue } from "./IMethodValue";
 
-let Gherkin = require("gherkin");
-let parser = new Gherkin.Parser();
+const Gherkin = require("gherkin");
+const parser = new Gherkin.Parser();
 
-let loki = require("lokijs");
+const loki = require("lokijs");
 
 export class Global {
     private cache: any;
@@ -29,12 +29,12 @@ export class Global {
         source,
         update: boolean = false,
         allToEnd: boolean = true,
-        fromFirst: boolean = true): Array<IMethodValue> {
+        fromFirst: boolean = true): IMethodValue[] {
 
-        let suffix = allToEnd ? "" : "$";
-        let prefix = fromFirst ? "^" : "";
-        let querystring = { name: { $regex: new RegExp(prefix + word + suffix, "i") } };
-        let entries = this.parse(source, filename).find(querystring);
+        const suffix = allToEnd ? "" : "$";
+        const prefix = fromFirst ? "^" : "";
+        const querystring = { name: { $regex: new RegExp(prefix + word + suffix, "i") } };
+        const entries = this.parse(source, filename).find(querystring);
         return entries;
     }
 
@@ -43,7 +43,7 @@ export class Global {
         this.db = this.cache.addCollection("ValueTable");
         this.dbcalls = this.cache.addCollection("Calls");
         this.languages = this.cache.addCollection("Languages");
-        let rootPath = vscode.workspace.rootPath;
+        const rootPath = vscode.workspace.rootPath;
         if (rootPath) {
             let featuresPath = String(vscode.workspace.getConfiguration("gherkin-autocomplete").get("featuresPath"));
             if (featuresPath) {
@@ -55,7 +55,7 @@ export class Global {
             this.findFilesForUpdate(featuresPath, "Features' cache is built.");
         }
 
-        let pathsLibrarys: string[] =
+        const pathsLibrarys: string[] =
             vscode.workspace.getConfiguration("gherkin-autocomplete")
                 .get<string[]>("featureLibraries", []);
         for (let library of pathsLibrarys) {
@@ -68,7 +68,7 @@ export class Global {
     };
 
     public updateCacheOfTextDocument(uri): any {
-        this.db.removeWhere((obj) => { return obj.filename === uri.fsPath; });
+        this.db.removeWhere((obj) => obj.filename === uri.fsPath);
         this.addFileToCache(uri);
     }
 
@@ -77,10 +77,10 @@ export class Global {
             this.updateCache();
             return new Array();
         } else {
-            let prefix = lazy ? "" : "^";
-            let suffix = all ? "" : "$";
-            let querystring = { name: { $regex: new RegExp(prefix + word + suffix, "i") } };
-            let search = this.db.chain().find(querystring).simplesort("name").data();
+            const prefix = lazy ? "" : "^";
+            const suffix = all ? "" : "$";
+            const querystring = { name: { $regex: new RegExp(prefix + word + suffix, "i") } };
+            const search = this.db.chain().find(querystring).simplesort("name").data();
             return search;
         }
     }
@@ -90,23 +90,23 @@ export class Global {
             this.updateCache();
             return new Array();
         }
-        let words = word.split(" ");
-        let sb: String[] = new Array();
+        const words = word.split(" ");
+        const sb: string[] = new Array();
         words.forEach( (element) => {
             sb.push("(?=.*");
             sb.push(element);
             sb.push(")");
         });
         sb.push(".+");
-        let querystring = { name: { $regex: new RegExp(sb.join(""), "i") } };
-        let search = this.db.chain().find(querystring).simplesort("name").data();
+        const querystring = { name: { $regex: new RegExp(sb.join(""), "i") } };
+        const search = this.db.chain().find(querystring).simplesort("name").data();
         return search;
     }
 
     public getLanguageInfo(filename: string): ILanguageInfo {
         if (!this.cacheUpdates) {
             this.updateCache();
-            let languageInfo: ILanguageInfo = {
+            const languageInfo: ILanguageInfo = {
                 language: "en",
                 name: filename,
             };
@@ -117,7 +117,7 @@ export class Global {
     }
 
     private findFilesForUpdate(library: string, successMessage: string): void {
-        let globOptions: glob.IOptions = {};
+        const globOptions: glob.IOptions = {};
         globOptions.dot = true;
         globOptions.cwd = library;
         globOptions.nocase = true;
@@ -129,7 +129,7 @@ export class Global {
                 console.error(err);
                 return;
             }
-            for (let file of files) {
+            for (const file of files) {
                 this.addFileToCache(vscode.Uri.file(file));
             }
             vscode.window.setStatusBarMessage(successMessage, 3000);
@@ -155,11 +155,11 @@ export class Global {
                 new vscode.Position(range.end.line, range.end.character + plus)
             );
         }
-        let dot = document.getText(newRange);
+        const dot = document.getText(newRange);
         if (dot.endsWith(".")) {
             let newPosition: vscode.Position;
             if (left) {
-                let leftWordRange: vscode.Range = document.getWordRangeAtPosition(newRange.start);
+                const leftWordRange: vscode.Range = document.getWordRangeAtPosition(newRange.start);
                 result = document.getText(leftWordRange) + "." + word;
                 if (leftWordRange.start.character > 1) {
                     newPosition = new vscode.Position(leftWordRange.start.line, leftWordRange.start.character - 2);
@@ -170,7 +170,7 @@ export class Global {
                 result = word + "." + document.getText(document.getWordRangeAtPosition(newRange.start));
                 newPosition = new vscode.Position(newRange.end.line, newRange.end.character + 2);
             }
-            let newWord = document.getWordRangeAtPosition(newPosition);
+            const newWord = document.getWordRangeAtPosition(newPosition);
             if (newWord) {
                 return this.fullNameRecursor(result, document, newWord, left);
             }
@@ -182,12 +182,12 @@ export class Global {
     }
 
     private addFileToCache(uri: vscode.Uri) {
-        let fullpath = uri.fsPath;
-        let source = fs.readFileSync(fullpath, "utf-8");
-        let entries = this.parse(source, fullpath).find();
+        const fullpath = uri.fsPath;
+        const source = fs.readFileSync(fullpath, "utf-8");
+        const entries = this.parse(source, fullpath).find();
         let count = 0;
-        for (let item of entries) {
-            let newItem: IMethodValue = {
+        for (const item of entries) {
+            const newItem: IMethodValue = {
                 description: item.description,
                 endline: item.endline,
                 filename: fullpath,
@@ -202,8 +202,8 @@ export class Global {
 
     private parse(source: string, filename: string): any {
 
-        let lockdb = new loki("loki.json");
-        let methods = lockdb.addCollection("ValueTable");
+        const lockdb = new loki("loki.json");
+        const methods = lockdb.addCollection("ValueTable");
         let gherkinDocument;
         try {
             gherkinDocument = parser.parse(source);
@@ -228,12 +228,12 @@ export class Global {
         }
 
         const children = gherkinDocument.feature.children;
-        for (let child of children) {
+        for (const child of children) {
             const steps = child.steps;
 
-            for (let step of steps) {
-                let text: string = step.text;
-                let methRow: IMethodValue = {
+            for (const step of steps) {
+                const text: string = step.text;
+                const methRow: IMethodValue = {
                     description: step.text,
                     endline: step.location.line,
                     filename,
