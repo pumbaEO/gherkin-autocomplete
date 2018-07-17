@@ -1,9 +1,10 @@
 import * as vscode from "vscode";
 import AbstractProvider from "./abstractProvider";
 // tslint:disable-next-line:ordered-imports
-import { IMethodValue, IBslMethodValue } from "../IMethodValue";
+import { IMethodValue, ILanguageInfo, IBslMethodValue } from "../IMethodValue";
 
 const Gherkin = require("gherkin");
+const parser = new Gherkin.Parser();
 const Token = require("./../../../node_modules/gherkin/lib/gherkin/token");
 const GherkinLine = require("./../../../node_modules/gherkin/lib/gherkin/gherkin_line");
 
@@ -47,10 +48,20 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
 
             const textLine: vscode.TextLine = document.lineAt(position.line);
 
-            const languageInfo = this._global.getLanguageInfo(filename);
+            let languageInfo = this._global.getLanguageInfo(filename);
             if (languageInfo == null) {
-                resolve(results);
-                return;
+                let gherkinDocument;
+                try {
+                    gherkinDocument = parser.parse(document.getText());
+                    languageInfo = {
+                        language: gherkinDocument.feature.language,
+                        name: document.uri.fsPath
+                    };
+                } catch (error) {
+                    console.error("FindReferences error parse file " + filename + ":" + error);
+                    resolve(results);
+                    return;
+                }
             }
             const TokenMatcher = new Gherkin.TokenMatcher(languageInfo.language);
 

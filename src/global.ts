@@ -4,7 +4,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import Parser = require("onec-syntaxparser");
 
-import { IBslMethodValue, IMethodValue } from "./IMethodValue";
+import { IBslMethodValue, ILanguageInfo, IMethodValue } from "./IMethodValue";
 
 const Gherkin = require("gherkin");
 const parser = new Gherkin.Parser();
@@ -427,9 +427,4 @@ export class Global {
 
         return methods;
     }
-}
-
-interface ILanguageInfo {
-    language: string;
-    name: string;
 }

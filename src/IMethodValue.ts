@@ -42,3 +42,8 @@ export interface IBslMethodValue {
     oscriptLib?: boolean;
     oscriptClass?: boolean;
 }
+
+export interface ILanguageInfo {
+    language: string;
+    name: string;
+}

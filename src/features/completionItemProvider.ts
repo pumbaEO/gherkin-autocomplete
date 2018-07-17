@@ -4,6 +4,7 @@ import { IMethodValue } from "../IMethodValue";
 import AbstractProvider from "./abstractProvider";
 
 const Gherkin = require("gherkin");
+const parser = new Gherkin.Parser();
 const Token = require("./../../../node_modules/gherkin/lib/gherkin/token");
 const GherkinLine = require("./../../../node_modules/gherkin/lib/gherkin/gherkin_line");
 
@@ -32,10 +33,20 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             );
 
             const filename = document.uri.fsPath;
-            const languageInfo = this._global.getLanguageInfo(filename);
+            let languageInfo = this._global.getLanguageInfo(filename);
             if (languageInfo == null) {
-                resolve(bucket);
-                return;
+                let gherkinDocument;
+                try {
+                    gherkinDocument = parser.parse(document.getText());
+                    languageInfo = {
+                        language: gherkinDocument.feature.language,
+                        name: document.uri.fsPath
+                    };
+                } catch (error) {
+                    console.error("provideCompletionItems error parse file " + filename + ":" + error);
+                    resolve(bucket);
+                    return;
+                }
             }
             const TokenMatcher = new Gherkin.TokenMatcher(languageInfo.language);
 
@@ -85,7 +96,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                     const item = new vscode.CompletionItem(value.name);
                     item.sortText = "0";
                     item.insertText = wordcomplite + value.name.substr(i + 1);
-                    item.filterText = wordcomplite + value.snippet.toLowerCase() + " ";
+                    // item.filterText = wordcomplite + value.snippet.toLowerCase() + " ";
 
                     item.documentation = value.description ? value.description : "";
                     item.kind = vscode.CompletionItemKind.Function;
