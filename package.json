@@ -64,6 +64,11 @@
           "description": "Relative path to features directory.",
           "type": "string",
           "default": "features"
+        },
+        "gherkin-autocomplete.srcBslPath": {
+          "description": "Path to source of bsl files",
+          "type": "array",
+          "default": []
         }
       }
     }
@@ -74,11 +79,13 @@
     "tslib": "^1.7.1",
     "tslint": "^5.5.0",
     "typescript": "^2.4.2",
+    "vsce": "^1.44.0",
     "vscode": "^1.1.4"
   },
   "dependencies": {
     "gherkin": "^5.0.1",
     "glob": "^7.1.2",
-    "lokijs": "^1.5.0"
+    "lokijs": "^1.5.0",
+    "onec-syntaxparser": "0.1.11"
   }
 }

@@ -10,6 +10,12 @@ const GherkinLine = require("./../../../node_modules/gherkin/lib/gherkin/gherkin
 export default class GlobalCompletionItemProvider extends AbstractProvider implements vscode.CompletionItemProvider {
     private added: object;
 
+    // tslint:disable-next-line:max-line-length
+    public resolveCompletionItem(item: vscode.CompletionItem, token: vscode.CancellationToken): vscode.CompletionItem | Thenable<vscode.CompletionItem> {
+
+        return item;
+    }
+
     public provideCompletionItems(
         document: vscode.TextDocument,
         position: vscode.Position,
@@ -21,6 +27,9 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
 
             const bucket = new Array<vscode.CompletionItem>();
             const textLine: vscode.TextLine = document.lineAt(position.line);
+            const wordcomplite: string = document.getText(
+                new vscode.Range(document.getWordRangeAtPosition(position).start, position)
+            );
 
             const filename = document.uri.fsPath;
             const languageInfo = this._global.getLanguageInfo(filename);
@@ -35,92 +44,144 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             const matches: boolean = TokenMatcher.match_StepLine(token);
 
             if (!matches) {
+                console.log("not mathed tocket for " + textLine.text);
                 return resolve(bucket);
             }
 
             const word: string = token.matchedText;
+            console.log("compilet for " + word + "filter " + wordcomplite);
 
-            let result: IMethodValue[] = this._global.getCacheLocal(filename, word, document.getText(), false);
+            const snippet = this._global.toSnippet(word);
+
+            let result = this._global.queryExportSnippet(snippet);
+            result.forEach((value, index, array) => {
+                const moduleDescription = "";
+                if (this.added[(moduleDescription + value.name).toLowerCase()] !== true) {
+                    const i = this.reverseIndex(snippet, value.name);
+                    const item = new vscode.CompletionItem(value.name);
+                    item.insertText = value.name;
+                    item.insertText = wordcomplite + value.name.substr(i + 1);
+                    item.sortText = "3";
+                    item.filterText = wordcomplite + value.snippet.toLowerCase() + " ";
+                    let startFilename = 0;
+                    if (value.filename.length - 60 > 0) {
+                        startFilename = value.filename.length - 60;
+                    }
+                    item.documentation = (value.description ? value.description : ""); // +
+                    //                    "\n" + value.snippet + ":" + value.line;
+                    item.kind = vscode.CompletionItemKind.Interface;
+                    item.label = value.name.substr(value.name.length - item.insertText.length);
+                    bucket.push(item);
+                    this.added[(moduleDescription + value.name).toLowerCase()] = true;
+                }
+            });
+
+            result = this._global.getCacheLocal(filename, word, document.getText(), false);
             result.forEach((value, index, array) => {
                 if (!this.added[value.name.toLowerCase()] === true) {
                     if (value.name === word) { return; }
+
+                    const i = this.reverseIndex(snippet, value.name);
                     const item = new vscode.CompletionItem(value.name);
                     item.sortText = "0";
-                    item.textEdit = new vscode.TextEdit(
-                        new vscode.Range(
-                            position.line,
-                            textLine.text.indexOf(token.matchedKeyword) + token.matchedKeyword.length,
-                            position.line,
-                            value.name.length + position.character - token.matchedText.length
-                        ),
-                        value.name
-                    );
-                    item.filterText = value.name.replace(/ /g, "").toLowerCase() + " ";
+                    item.insertText = wordcomplite + value.name.substr(i + 1);
+                    item.filterText = wordcomplite + value.snippet.toLowerCase() + " ";
+
                     item.documentation = value.description ? value.description : "";
-                    item.kind = vscode.CompletionItemKind.Keyword;
+                    item.kind = vscode.CompletionItemKind.Function;
+                    item.label = value.name;
+                    item.label = value.name.substr(value.name.length - item.insertText.length);
                     bucket.push(item);
                     this.added[value.name.toLowerCase()] = true;
                 }
             });
-            result = this._global.query(filename, word, true, true);
-            result.forEach((value, index, array) => {
-                const moduleDescription = "";
-                if (this.added[(moduleDescription + value.name).toLowerCase()] !== true) {
-                    const item = new vscode.CompletionItem(value.name);
-                    item.insertText = value.name.substr(word.length);
-                    item.sortText = "1";
-                    item.textEdit = new vscode.TextEdit(
-                        new vscode.Range(
-                            position.line,
-                            textLine.text.indexOf(token.matchedKeyword) + token.matchedKeyword.length,
-                            position.line,
-                            value.name.length + position.character - token.matchedText.length
-                        ),
-                        value.name
-                    );
-                    item.filterText = value.name.replace(/ /g, "").toLowerCase() + " ";
-                    let startFilename = 0;
-                    if (value.filename.length - 60 > 0) {
-                        startFilename = value.filename.length - 60;
-                    }
-                    item.documentation = (value.description ? value.description : "") +
-                                        "\n" + value.filename.substr(startFilename) + ":" + value.line;
-                    item.kind = value.kind ? value.kind : vscode.CompletionItemKind.File;
-                    bucket.push(item);
-                    this.added[(moduleDescription + value.name).toLowerCase()] = true;
-                }
-            });
 
-            result = this._global.queryAny(word);
+            result = this._global.querySnippet(word);
             result.forEach((value, index, array) => {
                 const moduleDescription = "";
                 if (this.added[(moduleDescription + value.name).toLowerCase()] !== true) {
+                    const i = this.reverseIndex(snippet, value.name);
                     const item = new vscode.CompletionItem(value.name);
-                    item.insertText = value.name.substr(word.length);
-                    item.sortText = "3";
-                    item.textEdit = vscode.TextEdit.replace(
-                        new vscode.Range(
-                            position.line,
-                            textLine.text.indexOf(token.matchedKeyword) + token.matchedKeyword.length,
-                            position.line,
-                            value.name.length + position.character - token.matchedText.length
-                        ),
-                        value.name
-                    );
-                    item.filterText = value.name.replace(/ /g, "").toLowerCase() + " ";
+                    item.insertText = value.name; // value.name.substr(word.length);
+                    item.sortText = "0";
+                    item.insertText = wordcomplite + value.name.substr(i + 1);
+
+                    item.filterText = wordcomplite + value.snippet.toLowerCase() + " ";
+                    item.label = value.name;
                     let startFilename = 0;
                     if (value.filename.length - 60 > 0) {
                         startFilename = value.filename.length - 60;
                     }
-                    item.documentation = (value.description ? value.description : "") +
-                                        "\n" + value.filename.substr(startFilename) + ":" + value.line;
-                    item.kind = vscode.CompletionItemKind.Property;
-                    item.label = value.name;
+                    item.documentation = (value.description ? value.description : "");
+                    item.kind = value.kind ? value.kind : vscode.CompletionItemKind.Field;
                     bucket.push(item);
                     this.added[(moduleDescription + value.name).toLowerCase()] = true;
                 }
             });
-            return resolve(bucket);
+            resolve(bucket);
+
+            return; // resolve(bucket);
         });
     }
+
+    private addOffset(str: string, regexp: RegExp, offsetObj: IObjOffset): string {
+        let m;
+        m = regexp.exec(str);
+        if (m !== null) {
+            offsetObj.offset = offsetObj.offset + m[0].length;
+            str = str.substr(offsetObj.index + offsetObj.offset);
+        }
+        return str
+    }
+    private  reverseIndex(snippet: string, fullSnippetString: string): number {
+        const indexString: number = snippet.length - 1;
+        const indexFull: number = fullSnippetString.length - 1;
+        let i = 0;
+        let offsetBase = 0;
+        const re3Quotes = new RegExp(/^('''([^''']|'''''')*''')/, "i");
+        const re1Quotes = new RegExp(/^('([^']|'')*')/, "i");
+        const re2Quotes = new RegExp(/^("([^"]|"")*")/, "i");
+        const re = new RegExp(/^(<([^<]|<>)*>)/, "i");
+        const reSpaces = new RegExp(/^\s/, "i");
+        const reWord = new RegExp(/\w|[а-яїєґ]/, "i")
+        let wordIndex = 0;
+        while (i < indexString) {
+            const offsetObj: IObjOffset = {
+                index: i,
+                offset: offsetBase
+            };
+            while (
+                // tslint:disable-next-line:max-line-length
+                (reWord.exec(fullSnippetString.charAt(offsetObj.index + offsetObj.offset)) == null) || (offsetObj.index + offsetObj.offset >= indexFull)
+                ) {
+                let str = this.addOffset(fullSnippetString.substr(
+                        offsetObj.index + offsetObj.offset), reSpaces, offsetObj);
+                str = this.addOffset(fullSnippetString.substr(
+                        offsetObj.index + offsetObj.offset), re3Quotes, offsetObj);
+                str = this.addOffset(fullSnippetString.substr(
+                        offsetObj.index + offsetObj.offset), re1Quotes, offsetObj);
+                str = this.addOffset(fullSnippetString.substr(
+                    offsetObj.index + offsetObj.offset), re2Quotes, offsetObj);
+                str = this.addOffset(fullSnippetString.substr(
+                    offsetObj.index + offsetObj.offset), re, offsetObj);
+                i = offsetObj.index;
+                offsetBase = offsetObj.offset;
+            }
+            wordIndex = i;
+            const char = snippet.charAt(i).toLowerCase();
+            const baseStr = fullSnippetString.charAt(i + offsetBase).toLowerCase();
+            if (char === baseStr) {
+                i ++;
+                continue;
+            } else {
+                break
+            }
+        }
+        return i + offsetBase;
+    }
+}
+
+interface IObjOffset {
+    index: number;
+    offset: number;
 }
