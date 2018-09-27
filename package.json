@@ -77,7 +77,7 @@
     "vscode": "^1.1.4"
   },
   "dependencies": {
-    "gherkin": "^5.0.1",
+    "gherkin": "^6.0.10",
     "glob": "^7.1.2",
     "lokijs": "^1.5.0"
   }
