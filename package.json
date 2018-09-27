@@ -26,11 +26,13 @@
     "engines": {
         "vscode": "^1.6.0"
     },
-    "badges": [{
-        "url": "https://david-dm.org/silverbulleters/gherkin-autocomplete.svg",
-        "href": "https://david-dm.org/silverbulleters/gherkin-autocomplete",
-        "description": "Dependency Status"
-    }],
+    "badges": [
+        {
+            "url": "https://david-dm.org/silverbulleters/gherkin-autocomplete.svg",
+            "href": "https://david-dm.org/silverbulleters/gherkin-autocomplete",
+            "description": "Dependency Status"
+        }
+    ],
     "main": "./out/src/extension",
     "scripts": {
         "vscode:prepublish": "tsc -p ./",
@@ -43,11 +45,13 @@
         "onCommand:gherkin-autocomplete.update"
     ],
     "contributes": {
-        "commands": [{
-            "command": "gherkin-autocomplete.update",
-            "title": "Update steps cache",
-            "category": "Gherkin autocomplete"
-        }],
+        "commands": [
+            {
+                "command": "gherkin-autocomplete.update",
+                "title": "Update steps cache",
+                "category": "Gherkin autocomplete"
+            }
+        ],
         "configuration": {
             "title": "Gherkin autocomplete configuration",
             "properties": {
