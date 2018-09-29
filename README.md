@@ -14,38 +14,38 @@ Scans all `*.bsl` files for 1C(BSL) and gives opportunity to find all references
 
 * `gherkin-autocomplete.featureLibraries`
 
-Array of directories with external libraries of features
-Type: Array of strings
-Format: Relative or absolute path to directory with feature-files.
-Default value: `[]`.
-Example:
+  - Array of directories with external libraries of features
+  - Type: Array of strings
+  - Format: Relative or absolute path to directory with feature-files.
+  - Default value: `[]`.
+  - Example:
 
 ```json
-    "gherkin-autocomplete.featureLibraries": [
-        "tools/add/features/Libraries",
-        "lib/MyCompanyFeaturesLibrary"
-    ]
+        "gherkin-autocomplete.featureLibraries": [
+            "tools/add/features/Libraries",
+            "lib/MyCompanyFeaturesLibrary"
+        ]
 ```
 
 * `gherkin-autocomplete.featuresPath`
 
-Relative path to features directory.
-Type: String
-Default value: `"features"`.
+  - Relative path to features directory.
+  - Type: String
+  - Default value: `"features"`.
 
 * `gherkin-autocomplete.srcBslPath`
 
-Array of directories with source of bsl files
-Type: Array of strings
-Format: Relative or absolute path to source of bsl files.
-Default value: `[]`.
-Example:
+  - Array of directories with source of bsl files
+  - Type: Array of strings
+  - Format: Relative or absolute path to source of bsl files.
+  - Default value: `[]`.
+  - Example:
 
 ```json
-    "gherkin-autocomplete.srcBslPath": [
-        "./src",
-        "MyCompanySourceFolder"
-    ]
+        "gherkin-autocomplete.srcBslPath": [
+            "./src",
+            "MyCompanySourceFolder"
+        ]
 ```
 
 ## Extension commands
