@@ -13,11 +13,13 @@ Scans all `*.bsl` files for 1C(BSL) and gives opportunity to find all references
 ## Extension settings
 
 * `gherkin-autocomplete.featureLibraries`
+
 Array of directories with external libraries of features
 Type: Array of strings
 Format: Relative or absolute path to directory with feature-files.
 Default value: `[]`.
 Example:
+
 ```json
     "gherkin-autocomplete.featureLibraries": [
         "tools/add/features/Libraries",
@@ -26,16 +28,19 @@ Example:
 ```
 
 * `gherkin-autocomplete.featuresPath`
+
 Relative path to features directory.
 Type: String
 Default value: `"features"`.
 
 * `gherkin-autocomplete.srcBslPath`
+
 Array of directories with source of bsl files
 Type: Array of strings
 Format: Relative or absolute path to source of bsl files.
 Default value: `[]`.
 Example:
+
 ```json
     "gherkin-autocomplete.srcBslPath": [
         "./src",
@@ -46,6 +51,7 @@ Example:
 ## Extension commands
 
 * `Gherkin autocomplete: Update steps cache`
+
 Recalculate workspace features' cache
 
 ![autocomplete](https://cloud.githubusercontent.com/assets/1132840/19971748/ffecea30-a1f0-11e6-9b23-1ed154338d17.gif)
