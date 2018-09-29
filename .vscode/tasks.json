@@ -24,6 +24,18 @@
 				"kind": "build",
 				"isDefault": true
 			}
+		},
+		{
+			"command": "vsce",
+			"label": "Package extension",
+			"type": "shell",
+			"args": [
+				"package"
+			],
+			"problemMatcher": [
+				"$tsc-watch"
+			],
+			"isBackground": false
 		}
 	]
 }
