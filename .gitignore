@@ -2,3 +2,4 @@
 .sonarlint/
 out
 node_modules
+*.vsix
