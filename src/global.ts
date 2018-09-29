@@ -63,6 +63,7 @@ export class Global {
             library = path.resolve(vscode.workspace.rootPath, library);
             this.findFilesForUpdate(library, "Feature libraries cache is built.");
             this.findFilesBslForUpdate(library, "Bsl snippets search.");
+            this.findFilesBslForUpdate(library, "OneScript snippets search.", true);
         }
 
         if (rootPath) {
@@ -78,6 +79,7 @@ export class Global {
             featuresPath = path.resolve(vscode.workspace.rootPath, featuresPath);
             this.findFilesForUpdate(featuresPath, "Features' cache is built.");
             this.findFilesBslForUpdate(featuresPath, "Bsl snippets search.");
+            this.findFilesBslForUpdate(featuresPath, "OneScript snippets search.", true);
         }
 
         const bslsPaths: string[] = vscode.workspace.getConfiguration("gherkin-autocomplete")
@@ -218,7 +220,7 @@ export class Global {
         });
     }
 
-    private findFilesBslForUpdate(modulepath: string, successMessage: string): void {
+    private findFilesBslForUpdate(modulepath: string, successMessage: string, findOneScript?: boolean): void {
         const globOptions: glob.IOptions = {};
         globOptions.dot = true;
         globOptions.cwd = modulepath;
@@ -226,14 +228,15 @@ export class Global {
         // glob >=7.0.0 contains this property
         // tslint:disable-next-line:no-string-literal
         globOptions["absolute"] = true;
-        glob("**/*.bsl", globOptions, (err, files) => {
+        const filemask = "**/*." + (findOneScript ? "os" : "bsl");
+        glob(filemask, globOptions, (err, files) => {
             if (err) {
                 console.error(err);
                 return;
             }
             for (const file of files) {
                 try {
-                    this.addSnippetsToCache(vscode.Uri.file(file));
+                    this.addSnippetsToCache(vscode.Uri.file(file), findOneScript);
                 } catch (error) {
                     console.error(file + ":" + error);
                 }
@@ -242,6 +245,7 @@ export class Global {
         });
 
     }
+
     private fullNameRecursor(word: string, document: vscode.TextDocument, range: vscode.Range, left: boolean) {
         let result: string;
         let plus: number = 1;
@@ -309,20 +313,38 @@ export class Global {
         }
     }
 
-    private parseSnippets(source: string, filename: string): any {
+    private parseSnippets(source: string, filename: string, findOneScript?: boolean): any {
 
-        const lockdb = new loki("loki.json");
-        const methods = lockdb.addCollection("ValueTable");
-        const re = new RegExp(/\.ДобавитьШагВМассивТестов\([a-zA-Zа-яА-Я]+\,\".*\","([a-zA-Zа-яА-Я]+)\"/, "igm");
-        const parsesModule = new Parser().parse(source);
-        const entries = parsesModule.getMethodsTable().find();
-        return entries;
+        const parsedModule = new Parser().parse(source);
+        const methodsTable = parsedModule.getMethodsTable();
+
+        const descrMethod = findOneScript ? "ПолучитьСписокШагов" : "ПолучитьСписокТестов";
+        const re = findOneScript ?
+            /ВсеШаги\.Добавить\(\"(.+)\"\);/igm
+            : /\.ДобавитьШагВМассивТестов\([a-zA-Zа-яА-Я]+\,\".*\","([a-zA-Zа-яА-Я]+)\"/igm;
+
+        const descrMethodEntries = methodsTable.findOne(
+                { isexport : { $eq : true }, name : descrMethod });
+        if(descrMethodEntries){
+
+            let stepnames = new Array();
+            var matches;
+            while ((matches = re.exec(source)) !== null) {
+                stepnames.push(matches[1]);
+            }
+
+            const entries = methodsTable.find(
+                { isexport : { $eq : true }, name: { $in :stepnames }}); //TODO нужно ли сравнивать с учетом регистра?
+            return entries;
+        }
+        else
+            return [];
     }
 
-    private addSnippetsToCache(uri: vscode.Uri) {
+    private addSnippetsToCache(uri: vscode.Uri, findOneScript?: boolean) {
         const fullpath = uri.fsPath;
         const source = fs.readFileSync(fullpath, "utf-8");
-        const entries = this.parseSnippets(source, fullpath);
+        const entries = this.parseSnippets(source, fullpath, findOneScript);
 
         for (const item of entries) {
             const method = {
