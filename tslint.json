@@ -1,13 +1,20 @@
 {
-	"extends": "tslint:latest",
+	"extends": [
+        "tslint:latest",
+        "tslint-sonarts"
+    ],
 	"rules": {
-		"semicolon": ["always"],
 		"no-var-requires": false,
 		"no-console": [
 			false
 		],
 		"trailing-comma": [
 			false
-		]
+		],
+		"semicolon": true,
+        "object-literal-sort-keys": false,
+        "forin": false,
+        "no-implicit-dependencies": [true, "dev"],
+        "deprecation": true
 	}
 }

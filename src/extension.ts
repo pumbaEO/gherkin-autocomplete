@@ -28,7 +28,8 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.languages.registerCodeLensProvider(["feature", "gherkin"], new CompletionCodeLensProvider(global))
     );
 
-    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument( (document: vscode.TextDocument) => {
+    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(
+        (document: vscode.TextDocument) => {
             global.updateCacheOfTextDocument(document.uri);
     }));
 

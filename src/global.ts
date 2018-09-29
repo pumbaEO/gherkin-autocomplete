@@ -1,8 +1,8 @@
 import * as fs from "fs";
 import * as glob from "glob";
+import Parser = require("onec-syntaxparser");
 import * as path from "path";
 import * as vscode from "vscode";
-import Parser = require("onec-syntaxparser");
 
 import { IBslMethodValue, ILanguageInfo, IMethodValue } from "./IMethodValue";
 
@@ -89,7 +89,7 @@ export class Global {
             blspath = path.resolve(vscode.workspace.rootPath, blspath);
             this.findFilesBslForUpdate(blspath, "Bsl snippets search.");
         }
-    };
+    }
 
     public updateCacheOfTextDocument(uri): any {
         this.db.removeWhere((obj) => obj.filename === uri.fsPath);
@@ -116,7 +116,7 @@ export class Global {
         }
         const words = word.split(" ");
         const sb: string[] = new Array();
-        words.forEach( (element) => {
+        words.forEach((element) => {
             sb.push("(?=.*");
             sb.push(element);
             sb.push(")");
@@ -157,7 +157,7 @@ export class Global {
 
             function filterByExport(obj) {
                 return obj.isexport;
-            };
+            }
             const search = this.db.chain().find(querystring).where(filterByExport)
                                 .limit(15)
                                 .simplesort("snippet")
@@ -186,7 +186,7 @@ export class Global {
         const reSpaces = new RegExp(/\s/, "g");
         let result = stringLine.replace(re3Quotes, getsnippet ? "" : "''''''")
                         .replace(re1Quotes, getsnippet ? "" : "''")
-                        .replace(re2Quotes, getsnippet ? "" : "\"\"" )
+                        .replace(re2Quotes, getsnippet ? "" : "\"\"")
                         .replace(re, getsnippet ? "" : "<>");
         if (getsnippet) {
             result = result.replace(reSpaces, "");
@@ -211,7 +211,7 @@ export class Global {
                 try {
                     this.addFileToCache(vscode.Uri.file(file));
                 } catch (error) {
-                    console.error( file + ":" + error);
+                    console.error(file + ":" + error);
                 }
             }
             vscode.window.setStatusBarMessage(successMessage, 3000);
@@ -235,7 +235,7 @@ export class Global {
                 try {
                     this.addSnippetsToCache(vscode.Uri.file(file));
                 } catch (error) {
-                    console.error( file + ":" + error);
+                    console.error(file + ":" + error);
                 }
             }
             vscode.window.setStatusBarMessage(successMessage, 3000);
