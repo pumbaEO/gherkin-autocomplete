@@ -28,9 +28,6 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
 
             const bucket = new Array<vscode.CompletionItem>();
             const textLine: vscode.TextLine = document.lineAt(position.line);
-            const wordcomplite: string = document.getText(
-                new vscode.Range(document.getWordRangeAtPosition(position).start, position)
-            );
 
             const filename = document.uri.fsPath;
             let languageInfo = this._global.getLanguageInfo(filename);
@@ -60,7 +57,12 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             }
 
             const word: string = token.matchedText;
-            console.log("compilet for " + word + "filter " + wordcomplite);
+            const wordRange: vscode.Range = document.getWordRangeAtPosition(position);
+            const wordcomplite: string = wordRange == null ? "" :
+                document.getText(
+                    new vscode.Range(wordRange.start, position)
+            );
+            console.log("compiler for <" + word + "> - filter <" + wordcomplite + ">");
 
             const snippet = this._global.toSnippet(word);
 
