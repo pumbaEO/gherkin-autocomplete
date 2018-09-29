@@ -62,7 +62,7 @@
                     "default": "features"
                 },
                 "gherkin-autocomplete.srcBslPath": {
-                    "description": "Path to source of bsl files",
+                    "description": "Array of directories with source of bsl files",
                     "type": "array",
                     "default": []
                 }
