@@ -64,7 +64,12 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             }
 
             const word: string = token.matchedText;
-            //console.log("compilet for " + word + "filter " + wordcomplite);
+            const wordRange: vscode.Range = document.getWordRangeAtPosition(position);
+            const wordcomplite: string = wordRange == null ? "" :
+                document.getText(
+                    new vscode.Range(wordRange.start, position)
+            );
+            console.log("compiler for <" + word + "> - filter <" + wordcomplite + ">");
 
             const snippet = this._global.toSnippet(word);
 
@@ -146,7 +151,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             offsetObj.offset = offsetObj.offset + m[0].length;
             str = str.substr(offsetObj.index + offsetObj.offset);
         }
-        return str
+        return str;
     }
     private  reverseIndex(snippet: string, fullSnippetString: string): number {
         const indexString: number = snippet.length - 1;
@@ -158,7 +163,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
         const re2Quotes = new RegExp(/^("([^"]|"")*")/, "i");
         const re = new RegExp(/^(<([^<]|<>)*>)/, "i");
         const reSpaces = new RegExp(/^\s/, "i");
-        const reWord = new RegExp(/\w|[а-яїєґ]/, "i")
+        const reWord = new RegExp(/\w|[а-яїєґ]/, "i");
         let wordIndex = 0;
         while (i < indexString) {
             const offsetObj: IObjOffset = {
@@ -189,7 +194,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 i ++;
                 continue;
             } else {
-                break
+                break;
             }
         }
         return i + offsetBase;

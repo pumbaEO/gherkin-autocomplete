@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { CodeLens, Range, TextDocument } from "vscode";
 import { IMethodValue } from "../IMethodValue";
 import AbstractProvider from "./abstractProvider";
 
@@ -15,10 +14,10 @@ const GherkinLine = require("./../../../node_modules/gherkin/lib/gherkin/gherkin
 // const Token = require("./../../../node_modules/gherkin/lib/gherkin/token");
 // const GherkinLine = require("./../../../node_modules/gherkin/lib/gherkin/gherkin_line");
 
-class ReferencesCodeLens extends CodeLens {
+class ReferencesCodeLens extends vscode.CodeLens {
     constructor(
-        public document: TextDocument,
-        public range: Range
+        public document: vscode.TextDocument,
+        public range: vscode.Range
     ) {
         super(range);
     }
@@ -47,7 +46,7 @@ export default class GlobalCompletionCodeLensProvider extends AbstractProvider i
             });
             resolve(result);
 
-        })
+        });
 
     }
 
@@ -68,7 +67,7 @@ export default class GlobalCompletionCodeLensProvider extends AbstractProvider i
             arguments: [codeLens.document.uri, codeLens.range.start],
             command: "vscode.executeReferenceProvider",
             title: "Export scenario"
-        }
+        };
         return codeLens;
 
         /*const referenceProvider = new ReferenceProvider(this._global);
@@ -183,4 +182,4 @@ export default class GlobalCompletionCodeLensProvider extends AbstractProvider i
 interface IToggleCommand {
     document: vscode.TextDocument;
     range: vscode.Range;
-};
+}
