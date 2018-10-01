@@ -24,7 +24,7 @@
         "feature"
     ],
     "engines": {
-        "vscode": "^1.6.0"
+        "vscode": "^1.26.0"
     },
     "badges": [
         {
@@ -75,15 +75,19 @@
     },
     "devDependencies": {
         "@types/glob": "^5.0.30",
-        "@types/node": "^10.5.2",
-        "tslib": "^1.7.1",
-        "tslint": "^5.5.0",
+        "@types/node": "^10.11.1",
+        "tslib": "^1.9.3",
+        "tslint": "^5.11.0",
         "typescript": "^2.4.2",
-        "vsce": "^1.44.0",
-        "vscode": "^1.1.18"
+        "vsce": "^1.51.0",
+        "vscode": "^1.1.21"
     },
     "dependencies": {
-        "gherkin": "^5.0.1",
+        "@babel/cli": "^7.1.2",
+        "@babel/core": "^7.1.2",
+        "@babel/plugin-transform-async-to-generator": "^7.1.0",
+        "@babel/preset-env": "^7.1.0",
+        "gherkin": "^6.0.14",
         "glob": "^7.1.2",
         "lokijs": "^1.5.0",
         "onec-syntaxparser": "0.1.11"

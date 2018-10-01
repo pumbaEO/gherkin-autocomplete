@@ -123,7 +123,7 @@ export default class GlobalCompletionCodeLensProvider extends AbstractProvider i
                 }
                 const word: string = token.matchedText;
                 const snippet = this._global.toSnippet(word);
-                const exportSnippets: IMethodValue[] = this._global.queryExportSnippet(snippet, false, true);
+                const exportSnippets: IMethodValue[] = this._global.queryExportSnippet(textdocument.fileName, snippet, false, true);
                 if (exportSnippets.length > 0) {
                     results.push(
                         {

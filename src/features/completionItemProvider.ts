@@ -28,10 +28,14 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
 
             const bucket = new Array<vscode.CompletionItem>();
             const textLine: vscode.TextLine = document.lineAt(position.line);
-            const wordcomplite: string = document.getText(
-                new vscode.Range(document.getWordRangeAtPosition(position).start, position)
-            );
-
+            let wordcomplite: string;
+            const wordPosition = document.getWordRangeAtPosition(position);
+            if (wordPosition !== undefined) {
+                wordcomplite = document.getText(
+                    new vscode.Range(wordPosition.start, position)
+                );
+            } 
+            
             const filename = document.uri.fsPath;
             let languageInfo = this._global.getLanguageInfo(filename);
             if (languageInfo == null) {
@@ -60,11 +64,11 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             }
 
             const word: string = token.matchedText;
-            console.log("compilet for " + word + "filter " + wordcomplite);
+            //console.log("compilet for " + word + "filter " + wordcomplite);
 
             const snippet = this._global.toSnippet(word);
 
-            let result = this._global.queryExportSnippet(snippet);
+            let result = this._global.queryExportSnippet(filename, snippet);
             result.forEach((value, index, array) => {
                 const moduleDescription = "";
                 if (this.added[(moduleDescription + value.name).toLowerCase()] !== true) {
@@ -107,7 +111,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 }
             });
 
-            result = this._global.querySnippet(word);
+            result = this._global.querySnippet(filename, word);
             result.forEach((value, index, array) => {
                 const moduleDescription = "";
                 if (this.added[(moduleDescription + value.name).toLowerCase()] !== true) {
