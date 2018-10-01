@@ -48,7 +48,7 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
 
             const textLine: vscode.TextLine = document.lineAt(position.line);
 
-            let languageInfo = this._global.getLanguageInfo(filename);
+            let languageInfo = this._global.getLanguageInfo(document.uri);
             if (languageInfo == null) {
                 let gherkinDocument;
                 try {
@@ -70,7 +70,7 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
             const matches: boolean = TokenMatcher.match_StepLine(token);
 
             if (!matches) {
-                console.log("not mathed tocket for " + textLine.text);
+                console.log("not mathed tocken for " + textLine.text);
                 return resolve(results);
             }
 
@@ -85,9 +85,9 @@ export default class GlobalReferenceProvider extends AbstractProvider implements
                 resolve(results);
             }
 
-            const exportSnippets: IMethodValue[] = this._global.queryExportSnippet(snippet, false, true);
+            const exportSnippets: IMethodValue[] = this._global.queryExportSnippet(document.uri, snippet, false, true);
             this.addReference(exportSnippets, results);
-            resolve(results);
+            return resolve(results);
         });
     }
 }

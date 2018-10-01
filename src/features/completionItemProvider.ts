@@ -28,15 +28,9 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
 
             const bucket = new Array<vscode.CompletionItem>();
             const textLine: vscode.TextLine = document.lineAt(position.line);
-            let wordcomplite: string;
-            const wordPosition = document.getWordRangeAtPosition(position);
-            if (wordPosition !== undefined) {
-                wordcomplite = document.getText(
-                    new vscode.Range(wordPosition.start, position)
-                );
-            } 
+
             
-            const filename = document.uri.fsPath;
+            const filename = document.uri;
             let languageInfo = this._global.getLanguageInfo(filename);
             if (languageInfo == null) {
                 let gherkinDocument;
@@ -59,15 +53,15 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             const matches: boolean = TokenMatcher.match_StepLine(token);
 
             if (!matches) {
-                console.log("not mathed tocket for " + textLine.text);
+                console.log("not mathed tocken for " + textLine.text);
                 return resolve(bucket);
             }
 
             const word: string = token.matchedText;
-            const wordRange: vscode.Range = document.getWordRangeAtPosition(position);
+            const wordRange = document.getWordRangeAtPosition(position);
             const wordcomplite: string = wordRange == null ? "" :
                 document.getText(
-                    new vscode.Range(wordRange.start, position)
+                    new vscode.Range((wordRange as vscode.Range).start, position)
             );
             console.log("compiler for <" + word + "> - filter <" + wordcomplite + ">");
 
@@ -96,7 +90,7 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
                 }
             });
 
-            result = this._global.getCacheLocal(filename, word, document.getText(), false);
+            result = this._global.getCacheLocal(filename.fsPath, word, document.getText(), false);
             result.forEach((value, index, array) => {
                 if (!this.added[value.name.toLowerCase()] === true) {
                     if (value.name === word) { return; }

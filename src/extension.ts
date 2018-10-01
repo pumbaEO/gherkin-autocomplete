@@ -21,7 +21,8 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(vscode.commands.registerCommand("gherkin-autocomplete.update", () => {
-        global.updateCache();
+        updateCacheForAll(global);
+        //vscode.commands.executeCommand("vscode.executeReferenceProvider", )
     }));
 
     context.subscriptions.push(
@@ -33,5 +34,15 @@ export function activate(context: vscode.ExtensionContext) {
             global.updateCacheOfTextDocument(document.uri);
     }));
 
-    global.updateCache();
+    updateCacheForAll(global);
+    
+}
+
+function updateCacheForAll(global) {
+
+    if (vscode.workspace.workspaceFolders !== undefined && vscode.workspace.workspaceFolders.length > 0) {
+        vscode.workspace.workspaceFolders.forEach(element => {
+            global.updateCache(element.uri.fsPath);
+        });
+    }
 }

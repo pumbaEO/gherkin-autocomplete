@@ -15,7 +15,7 @@
         "url": "https://github.com/silverbulleters/gherkin-autocomplete.git"
     },
     "categories": [
-        "Languages",
+        "Programming Languages",
         "Other"
     ],
     "keywords": [
@@ -83,11 +83,7 @@
         "vscode": "^1.1.21"
     },
     "dependencies": {
-        "@babel/cli": "^7.1.2",
-        "@babel/core": "^7.1.2",
-        "@babel/plugin-transform-async-to-generator": "^7.1.0",
-        "@babel/preset-env": "^7.1.0",
-        "gherkin": "^6.0.14",
+        "gherkin": "^5.1.0",
         "glob": "^7.1.3",
         "lokijs": "^1.5.0",
         "onec-syntaxparser": "0.1.11"

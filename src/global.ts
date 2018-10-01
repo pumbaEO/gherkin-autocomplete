@@ -99,8 +99,8 @@ export class Global {
         this.addFileToCache(uri);
     }
 
-    public query(filename: string, word: string, all: boolean = true, lazy: boolean = false): any {
-        let rootFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(filename));
+    public query(filename: vscode.Uri, word: string, all: boolean = true, lazy: boolean = false): any {
+        let rootFolder = vscode.workspace.getWorkspaceFolder(filename);
         if (!rootFolder){
             return new Array;
         }
@@ -116,8 +116,8 @@ export class Global {
         }
     }
 
-    public queryAny(filename: string, word: string): any {
-        let rootFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(filename));
+    public queryAny(filename: vscode.Uri, word: string): any {
+        let rootFolder = vscode.workspace.getWorkspaceFolder(filename);
         if (rootFolder){
             if (!this.cacheUpdates.get(rootFolder.uri.fsPath)) {
                 this.updateCache(rootFolder.uri.fsPath);
@@ -136,8 +136,8 @@ export class Global {
         return search;
     }
 
-    public querySnippet(filename: string, word: string, all: boolean = true, lazy: boolean = false): any {
-        let rootFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(filename));
+    public querySnippet(filename: vscode.Uri, word: string, all: boolean = true, lazy: boolean = false): any {
+        let rootFolder = vscode.workspace.getWorkspaceFolder(filename);
         if (rootFolder){
             if (!this.cacheUpdates.get(rootFolder.uri.fsPath)) {
                 this.updateCache(rootFolder.uri.fsPath);
@@ -151,8 +151,8 @@ export class Global {
         return search;
     }
 
-    public queryExportSnippet(filename: string, word: string, all: boolean = true, lazy: boolean = false): any {
-        let rootFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(filename));
+    public queryExportSnippet(filename: vscode.Uri, word: string, all: boolean = true, lazy: boolean = false): any {
+        let rootFolder = vscode.workspace.getWorkspaceFolder(filename);
         if (rootFolder){
             if (!this.cacheUpdates.get(rootFolder.uri.fsPath)) {
                 this.updateCache(rootFolder.uri.fsPath);
@@ -177,14 +177,14 @@ export class Global {
         return search;
     
     }
-    public getLanguageInfo(filename: string): ILanguageInfo {
+    public getLanguageInfo(filename: vscode.Uri): ILanguageInfo {
         
         const languageInfo: ILanguageInfo = {
             language: "en",
-            name: filename,
+            name: filename.fsPath,
         };
         
-        let rootFolder = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(filename));
+        let rootFolder = vscode.workspace.getWorkspaceFolder(filename);
         if (rootFolder){
             if (!this.cacheUpdates.get(rootFolder.uri.fsPath)) {
                 this.updateCache(rootFolder.uri.fsPath);
@@ -194,7 +194,7 @@ export class Global {
             return languageInfo;
         }
         
-        return this.languages.findOne({ name: filename });
+        return this.languages.findOne({ name: filename.fsPath });
     }
 
     public toSnippet(stringLine: string, getsnippet: boolean = true): string {

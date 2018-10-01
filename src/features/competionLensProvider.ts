@@ -17,7 +17,9 @@ const GherkinLine = require("./../../../node_modules/gherkin/lib/gherkin/gherkin
 class ReferencesCodeLens extends vscode.CodeLens {
     constructor(
         public document: vscode.TextDocument,
-        public range: vscode.Range
+        public range: vscode.Range,
+        public documentref: vscode.Uri,
+        public rangeref: vscode.Range
     ) {
         super(range);
     }
@@ -34,7 +36,7 @@ export default class GlobalCompletionCodeLensProvider extends AbstractProvider i
             const matches = this.findGherkinStrings(document);
             matches.forEach((match) => {
                 result.push(
-                    new ReferencesCodeLens(match.document, match.range)
+                    new ReferencesCodeLens(match.document, match.range, match.documentref, match.rangeref)
                     /*new vscode.CodeLens(
                     match.range,
                     {
@@ -63,9 +65,11 @@ export default class GlobalCompletionCodeLensProvider extends AbstractProvider i
         //     codeLens.document.uri,
         //     codeLens.range.start
         // );
+        let references: vscode.Location[] = new Array;
+        references.push(new vscode.Location(codeLens.documentref, codeLens.rangeref));
         codeLens.command = {
-            arguments: [codeLens.document.uri, codeLens.range.start],
-            command: "vscode.executeReferenceProvider",
+            arguments: [codeLens.document.uri, codeLens.range.start, references],
+            command: "editor.action.showReferences",
             title: "Export scenario"
         };
         return codeLens;
@@ -122,15 +126,27 @@ export default class GlobalCompletionCodeLensProvider extends AbstractProvider i
                 }
                 const word: string = token.matchedText;
                 const snippet = this._global.toSnippet(word);
-                const exportSnippets: IMethodValue[] = this._global.queryExportSnippet(textdocument.fileName, snippet, false, true);
-                if (exportSnippets.length > 0) {
-                    results.push(
-                        {
-                            document: textdocument,
-                            range: line.range
-                        }
-                    );
+                if (snippet.length == 0){
+                    return results;
                 }
+                const exportSnippets: IMethodValue[] = this._global.queryExportSnippet(textdocument.uri, snippet, false, false);
+                if (exportSnippets.length > 0) {
+                    let element  = exportSnippets[0];
+
+                    // exportSnippets.forEach(element => {
+                        
+                        //let uri = new vscode.Uri("file", "" ,element.filename);
+                        //let fsPath = uri.toString();
+                        results.push(
+                            {
+                                document: textdocument,
+                                range: line.range,
+                                documentref:  vscode.Uri.file(element.filename),
+                                rangeref: new vscode.Range(new vscode.Position(element.line, 1), new vscode.Position(element.line, 1))
+                            }
+                        )
+                    // });
+                };
         }
         return results;
     }
@@ -182,4 +198,8 @@ export default class GlobalCompletionCodeLensProvider extends AbstractProvider i
 interface IToggleCommand {
     document: vscode.TextDocument;
     range: vscode.Range;
+    documentref: vscode.Uri;
+    rangeref: vscode.Range;
+
+
 }
