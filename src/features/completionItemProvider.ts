@@ -58,10 +58,10 @@ export default class GlobalCompletionItemProvider extends AbstractProvider imple
             }
 
             const word: string = token.matchedText;
-            const wordRange = document.getWordRangeAtPosition(position);
+            const wordRange: vscode.Range | undefined = document.getWordRangeAtPosition(position);
             const wordcomplite: string = wordRange == null ? "" :
                 document.getText(
-                    new vscode.Range((wordRange as vscode.Range).start, position)
+                    new vscode.Range(wordRange.start, position)
             );
             console.log("compiler for <" + word + "> - filter <" + wordcomplite + ">");
 
