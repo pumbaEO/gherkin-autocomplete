@@ -52,7 +52,6 @@ export class Global {
         this.db = this.cache.addCollection("ValueTable");
         this.dbsnippets = this.cache.addCollection("Calls");
         this.languages = this.cache.addCollection("Languages");
-        // const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 
         const pathsLibrarys: string[] =
             vscode.workspace.getConfiguration("gherkin-autocomplete")
@@ -261,64 +260,6 @@ export class Global {
             vscode.window.setStatusBarMessage(successMessage, 3000);
         });
 
-    }
-
-    private fullNameRecursor(word: string, document: vscode.TextDocument, range: vscode.Range, left: boolean) {
-        let result: string;
-        let plus: number = 1;
-        let newRange: vscode.Range;
-
-        result = word;
-
-        if (left) {
-            plus = -1;
-            if (range.start.character === 0) {
-                return word;
-            }
-            newRange = new vscode.Range(
-                new vscode.Position(range.start.line, range.start.character + plus),
-                new vscode.Position(range.start.line, range.start.character)
-            );
-        } else {
-            newRange = new vscode.Range(
-                new vscode.Position(range.end.line, range.end.character),
-                new vscode.Position(range.end.line, range.end.character + plus)
-            );
-        }
-        const dot = document.getText(newRange);
-        if (dot.endsWith(".")) {
-            let newPosition: vscode.Position;
-            newPosition = new vscode.Position(newRange.start.line, 0);
-            if (left) {
-                
-                const leftWordRange = document.getWordRangeAtPosition(newRange.start);
-                if (leftWordRange == null ) {
-
-                } else {
-                    result = document.getText(leftWordRange) + "." + word;
-                    newPosition = new vscode.Position(leftWordRange.start.line, 0);
-                    if (leftWordRange.start.character > 1) {
-                        newPosition = new vscode.Position(leftWordRange.start.line, leftWordRange.start.character - 2);
-                    }
-                }
-                
-                
-            } else {
-                result = word + "." + document.getText(document.getWordRangeAtPosition(newRange.start));
-                newPosition = new vscode.Position(newRange.end.line, newRange.end.character + 2);
-            }
-            if (newPosition) {
-                const newWord = document.getWordRangeAtPosition(newPosition);
-                if (newWord) {
-                    return this.fullNameRecursor(result, document, newWord, left);
-                }
-            }
-            
-            return result;
-        } else {
-            result = word;
-            return result;
-        }
     }
 
     private addFileToCache(uri: vscode.Uri) {
